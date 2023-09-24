@@ -1,0 +1,51 @@
+{{define "header"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="h-screen bg-gray-100">
+    <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
+      <nav class="px-8 py-6 flex items-center space-x-12">
+        <div class="text-4xl font-serif">Lenslocked</div>
+        <div class="flex-grow">
+          <a class="text-lg font-semibold hover:text-blue-100 pr-8" href="/">
+            Home
+          </a>
+          <a
+            class="text-lg font-semibold hover:text-blue-100 pr-8"
+            href="/contact"
+          >
+            Contact
+          </a>
+          <a class="text-lg font-semibold hover:text-blue-100 pr-8" href="/faq">
+            FAQ
+          </a>
+        </div>
+        <div class="space-x-4">
+          <form action="/signout" method="post" class="inline pr-4">
+            <button type="submit">Sign out</button>
+          </form>
+          <a href="/signin">Sign in</a>
+          <a
+            href="/signup"
+            class="px-4 py-2 bg-blue-700 hover:bg-blue-600 rounded"
+          >
+            Sign up
+          </a>
+        </div>
+      </nav>
+    </header>
+{{end}}
+
+    <!-- Each page's content goes here. -->
+
+{{define "footer"}}
+  </body>
+</html>
+{{end}}

@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  # Our Postgres database
+  db: # The service will be named db.
+    image: postgres # The postgres image will be used
+    restart: always # Always try to restart if this stops running
+    environment: # Provide environment variables
+      POSTGRES_USER: admin # POSTGRES_USER env var w/ value baloo
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: todo
+    ports: # Expose ports so that apps not running via docker compose can connect to them.
+      - 5432:5432 # format here is "port on our machine":"port on container"
