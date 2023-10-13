@@ -19,17 +19,6 @@ func Open(config PostgresConfig) (*sql.DB, error) {
 	return db, nil
 }
 
-func DefaultPostgresConfig() PostgresConfig {
-	return PostgresConfig{
-		Host:     "localhost",
-		Port:     "5432",
-		User:     "admin",
-		Password: "admin",
-		Database: "todo",
-		SSLMode:  "disable",
-	}
-}
-
 type PostgresConfig struct {
 	Host     string
 	Port     string
