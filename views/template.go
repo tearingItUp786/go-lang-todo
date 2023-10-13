@@ -32,7 +32,7 @@ type Template struct {
 	htmlTpl *template.Template
 }
 
-func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface{}) {
+func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 	tpl, err := t.htmlTpl.Clone()
 	if err != nil {
 		log.Printf("cloning template: %v", err)
@@ -40,6 +40,7 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		return
 	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
 	var buf bytes.Buffer
 	err = tpl.Execute(&buf, data)
 	if err != nil {

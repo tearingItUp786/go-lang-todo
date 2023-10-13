@@ -12,24 +12,18 @@ import (
 
 // BaseHandler
 type BaseHandler struct {
-	db        *sql.DB
-	Templates struct {
-		Home Template
-	}
+	db           *sql.DB
+	homeTemplate Template
 }
 
 // NewBaseHandler returns a new BaseHandler
 func NewBaseHandler(db *sql.DB) *BaseHandler {
 	return &BaseHandler{
 		db: db,
-		Templates: struct {
-			Home Template
-		}{
-			Home: views.Must(views.ParseFS(
-				templates.FS,
-				"index.gohtml", "template.gohtml",
-			)),
-		},
+		homeTemplate: views.Must(views.ParseFS(
+			templates.FS,
+			"index.gohtml", "template.gohtml",
+		)),
 	}
 }
 
@@ -50,5 +44,5 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 	data := Data{
 		ToDos: todos,
 	}
-	h.Templates.Home.Execute(w, r, data)
+	h.homeTemplate.Execute(w, r, data)
 }
