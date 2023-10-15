@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/tearingItUp786/go-lang-todo/models"
 	"github.com/tearingItUp786/go-lang-todo/templates"
 	"github.com/tearingItUp786/go-lang-todo/views"
@@ -12,17 +12,21 @@ import (
 
 // BaseHandler
 type BaseHandler struct {
-	db           *sql.DB
+	todoService  *models.BaseModel
 	homeTemplate Template
 }
 
+type BaseHandlerInput struct {
+	TodoService *models.BaseModel
+}
+
 // NewBaseHandler returns a new BaseHandler
-func NewBaseHandler(db *sql.DB) *BaseHandler {
+func NewTodoContaroller(baseInput BaseHandlerInput) *BaseHandler {
 	return &BaseHandler{
-		db: db,
+		todoService: baseInput.TodoService,
 		homeTemplate: views.Must(views.ParseFS(
 			templates.FS,
-			"index.gohtml", "template.gohtml",
+			"index.gohtml", "template.gohtml", "todo/normal.gohtml",
 		)),
 	}
 }
@@ -32,17 +36,22 @@ type Data struct {
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
-	if err := h.db.Ping(); err != nil {
+	todos, err := h.todoService.GetTodos()
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
-	baseModel := models.NewBaseModel(h.db)
-
-	todos, _ := baseModel.GetTodos()
 	fmt.Println(todos)
 
 	data := Data{
 		ToDos: todos,
 	}
 	h.homeTemplate.Execute(w, r, data)
+}
+
+func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	err := h.todoService.ToggleTodo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }

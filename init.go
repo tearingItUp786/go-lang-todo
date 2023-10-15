@@ -33,10 +33,15 @@ func main() {
 
 	defer db.Close()
 
-	todoController := controllers.NewBaseHandler(db)
+	todoService := models.NewBaseModel(db)
+	todoController := controllers.NewTodoContaroller(
+		controllers.BaseHandlerInput{TodoService: todoService},
+	)
 
 	router := chi.NewRouter()
 	router.Get("/", todoController.GetToDos)
+	router.Patch("/{id}/toggle", todoController.ToggleTodo)
 
-	http.ListenAndServe(":3000", router)
+	fmt.Println("Server running on port 3001")
+	http.ListenAndServe(":3001", router)
 }

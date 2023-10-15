@@ -1,13 +1,38 @@
 {{template "header" .}}
+
 <div class="px-6">
   <h1 class="py-4 text-4xl semibold tracking-tight">
     Welcome to my awesome site!
   </h1>
-  <ul>
+  <div class="md:flex md:flex-column">
 
-{{range .ToDos}}
-   <li className="block"> {{.Text}}</li>
-{{end}}
-  </ul>
+    <div class="w-full  pr-3">
+      {{if gt (len .ToDos) 0}}
+        <h2 class="text-3xl mb-4">Remaining tasks</h2>
+        <ul>
+          {{range .ToDos}}
+              {{ if not  .Done }}
+                  {{ template "todo-item" . }}
+              {{ end }}
+          {{end}}
+        </ul>
+      {{end}}
+    </div>
+
+    <div class="w-full pl-3">
+      {{if gt (len .ToDos) 0}}
+        <h2 class="text-3xl mb-4">Completed tasks</h2>
+        <ul>
+          {{range .ToDos}}
+              {{ if .Done }}
+                {{ template "todo-item" . }}
+              {{ end }}
+          {{end}}
+        </ul>
+      {{end}}
+    </div>
+
+  </div>
 </div>
+
 {{template "footer" .}}

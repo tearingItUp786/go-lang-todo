@@ -39,14 +39,26 @@ func (b *BaseModel) GetTodos() ([]ToDo, error) {
 
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
+		panic(err)
 	}
 
 	return todos, nil
 }
 
 func (b *BaseModel) InsertToDo(todo string) {
-	_, err := b.db.Exec("INSERT INTO todo (todo, done) VALUES ($1, $2)", todo, false)
+	_, err := b.db.Exec("INSERT INTO todo (text, done) VALUES ($1, $2)", todo, false)
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func (b *BaseModel) ToggleTodo(todoId string) error {
+	_, err := b.db.Exec(`UPDATE todo
+			SET done = NOT done-- or any other value you want to set
+			WHERE id = $1;`, todoId)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
