@@ -46,6 +46,8 @@ func main() {
 	router.Get("/{id}/edit", todoController.GetEditToDo)
 	router.Patch("/{id}/edit", todoController.PatchEditToDo)
 
-	fmt.Println("Server running on port 3001")
-	http.ListenAndServe(":3001", router)
+	port := os.Getenv("PORT")
+
+	fmt.Println("Server running on port", port)
+	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
 }

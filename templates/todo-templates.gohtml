@@ -5,6 +5,9 @@
   flex justify-between border-2 border-gray-500 p-2 rounded-lg 
   mb-4
   ">
+    {{ if .Error }}
+      <h1>Fuck</h1>
+    {{ end }}
     <div class="flex items-center">
         <input 
           {{ if .Done }} checked {{ end }} 
@@ -53,6 +56,12 @@
   flex justify-between border-2 border-gray-500 p-2 rounded-lg 
   mb-4
   ">
+  <form
+    class="flex w-full"
+    hx-patch="/{{ .Id }}/edit"
+    hx-target="#todo-{{.Id }}"
+    hx-swap="outerHTML"
+  >
     <div class="flex grow items-center">
         <input 
           {{ if .Done }} checked {{ end }} 
@@ -67,7 +76,7 @@
           name="todo-text"
           type="text" 
           id="text-{{ .Id }}" 
-          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " 
+          class="ml-2 mr-4 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " 
           required
           value="{{ .Text }}"
         >
@@ -76,13 +85,9 @@
     <div>
       <button 
         type="submit"
-        hx-include="[name='todo-done'],[name='todo-text']"
-        hx-patch="/{{ .Id }}/edit"
-        hx-target="#todo-{{.Id }}"
-        hx-swap="outerHTML"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
-        Done
+       Submit 
       </button>
       <button 
         hx-target="#todo-{{ .Id }}"
@@ -92,6 +97,7 @@
       >
         Remove
       </button>
+    </form>
     </div>
   </li>
 {{ end }}

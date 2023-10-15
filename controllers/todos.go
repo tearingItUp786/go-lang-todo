@@ -41,8 +41,24 @@ func NewTodoContaroller(baseInput BaseHandlerInput) *BaseHandler {
 	}
 }
 
+type EnhancedToDo struct {
+	models.ToDo
+	Error bool
+}
+
+func NewEnhancedToDo(todo models.ToDo) EnhancedToDo {
+	return EnhancedToDo{
+		ToDo: models.ToDo{
+			Id:   todo.Id,
+			Text: todo.Text,
+			Done: todo.Done,
+		},
+		Error: false,
+	}
+}
+
 type Data struct {
-	ToDos []models.ToDo
+	ToDos []EnhancedToDo
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +70,16 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
+	enhancedToDos := []EnhancedToDo{}
+	for _, todo := range todos {
+		fmt.Println(todo)
+		todo := NewEnhancedToDo(todo)
+		enhancedToDos = append(enhancedToDos, todo)
+	}
+
+	fmt.Println(enhancedToDos)
 	data := Data{
-		ToDos: todos,
+		ToDos: enhancedToDos,
 	}
 	h.homeTemplate.Execute(w, r, data)
 }
@@ -67,7 +91,7 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", row)
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(row))
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
@@ -93,24 +117,40 @@ func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 
-	oldTodo, err := h.todoService.GetSingleToDo(id)
+	oldToDo, err := h.todoService.GetSingleToDo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	enhancedToDo := NewEnhancedToDo(oldToDo)
 
 	newToDoDone := r.FormValue("todo-done")
 	toDoDoneAsBool := newToDoDone == "true"
 	newToDoText := r.FormValue("todo-text")
 
-	todo, err := h.todoService.UpdateSingleToDo(id, newToDoText, toDoDoneAsBool)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-	if oldTodo.Done != todo.Done {
+	if newToDoText == "" {
+		enhancedToDo.Error = true
 
-		h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", todo)
+		h.todoTemplate.ExecuteTemplate(
+			w,
+			r,
+			"swap-single",
+			enhancedToDo,
+		)
 		return
 	}
 
-	h.todoTemplate.ExecuteTemplate(w, r, "swap-single", todo)
+	todo, err := h.todoService.UpdateSingleToDo(id, newToDoText, toDoDoneAsBool)
+	enhancedToDo = NewEnhancedToDo(todo)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	if oldToDo.Done != todo.Done {
+
+		h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", enhancedToDo)
+		return
+	}
+
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-single", enhancedToDo)
 }
