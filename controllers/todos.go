@@ -26,12 +26,12 @@ type BaseHandlerInput struct {
 func NewTodoContaroller(baseInput BaseHandlerInput) *BaseHandler {
 	homeTemplate := views.Must(views.ParseFS(
 		templates.FS,
-		"index.gohtml", "template.gohtml", "todo/normal.gohtml",
+		"index.gohtml", "template.gohtml", "todo-templates.gohtml",
 	))
 
 	todoTemplate := views.Must(views.ParseFS(
 		templates.FS,
-		"render.gohtml", "todo/normal.gohtml",
+		"todo-templates.gohtml",
 	))
 
 	return &BaseHandler{
@@ -67,7 +67,7 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	h.todoTemplate.Execute(w, r, row)
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", row)
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
@@ -78,4 +78,39 @@ func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write([]byte(""))
+}
+
+func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	todo, err := h.todoService.GetSingleToDo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	h.todoTemplate.ExecuteTemplate(w, r, "edit-todo", todo)
+}
+
+func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+
+	oldTodo, err := h.todoService.GetSingleToDo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	newToDoDone := r.FormValue("todo-done")
+	toDoDoneAsBool := newToDoDone == "true"
+	newToDoText := r.FormValue("todo-text")
+
+	todo, err := h.todoService.UpdateSingleToDo(id, newToDoText, toDoDoneAsBool)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	if oldTodo.Done != todo.Done {
+
+		h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", todo)
+		return
+	}
+
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-single", todo)
 }

@@ -1,0 +1,110 @@
+{{ define "todo-item" }}
+  <li 
+  id="todo-{{ .Id }}"
+  class="
+  flex justify-between border-2 border-gray-500 p-2 rounded-lg 
+  mb-4
+  ">
+    <div class="flex items-center">
+        <input 
+          {{ if .Done }} checked {{ end }} 
+          hx-target="#todo-{{ .Id }}"
+          hx-swap="outerHTML"
+          hx-patch="/{{ .Id }}/toggle" 
+          id="checkbox-{{ .Id }}" 
+          type="checkbox" 
+          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        >
+
+        <label 
+            id="label-{{ .Id }}" 
+            for="checkbox-{{ .Id }}" 
+            class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-600">
+          {{ .Text }}
+        </label>
+    </div>
+
+    <div>
+      <button 
+        hx-get="/{{ .Id }}/edit"
+        hx-swap="outerHTML"
+        hx-target="#todo-{{.Id }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Edit 
+      </button>
+      <button 
+        hx-target="#todo-{{ .Id }}"
+        hx-swap="outerHTML"
+        hx-delete="/{{ .Id }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Remove
+      </button>
+    </div>
+  </li>
+{{ end }}
+
+
+{{ define "edit-todo" }}
+  <li 
+  id="todo-{{ .Id }}"
+  class="
+  flex justify-between border-2 border-gray-500 p-2 rounded-lg 
+  mb-4
+  ">
+    <div class="flex grow items-center">
+        <input 
+          {{ if .Done }} checked {{ end }} 
+          name="todo-done"
+          value="true"
+          id="checkbox-{{ .Id }}" 
+          type="checkbox" 
+          class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        >
+
+        <input 
+          name="todo-text"
+          type="text" 
+          id="text-{{ .Id }}" 
+          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 " 
+          required
+          value="{{ .Text }}"
+        >
+    </div>
+
+    <div>
+      <button 
+        type="submit"
+        hx-include="[name='todo-done'],[name='todo-text']"
+        hx-patch="/{{ .Id }}/edit"
+        hx-target="#todo-{{.Id }}"
+        hx-swap="outerHTML"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Done
+      </button>
+      <button 
+        hx-target="#todo-{{ .Id }}"
+        hx-swap="outerHTML"
+        hx-delete="/{{ .Id }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Remove
+      </button>
+    </div>
+  </li>
+{{ end }}
+
+{{ define "swap-todo" }}
+  <div
+  {{ if .Done }} hx-swap-oob="afterbegin:#complete-list" {{ end }}
+  {{ if not  .Done }} hx-swap-oob="afterbegin:#incomplete-list" {{ end }}
+  >
+    {{ template "todo-item" . }}
+  </div>
+{{ end }}
+
+{{ define "swap-single" }}
+    {{ template "todo-item" . }}
+{{ end }}

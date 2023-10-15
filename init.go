@@ -40,8 +40,11 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Get("/", todoController.GetToDos)
+
 	router.Delete("/{id}", todoController.DeleteTodo)
 	router.Patch("/{id}/toggle", todoController.ToggleTodo)
+	router.Get("/{id}/edit", todoController.GetEditToDo)
+	router.Patch("/{id}/edit", todoController.PatchEditToDo)
 
 	fmt.Println("Server running on port 3001")
 	http.ListenAndServe(":3001", router)
