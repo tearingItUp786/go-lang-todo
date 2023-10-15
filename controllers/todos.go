@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tearingItUp786/go-lang-todo/models"
@@ -44,6 +46,9 @@ type Data struct {
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
+	h.todoService.InsertToDo(
+		fmt.Sprintf("Hello World %v", time.Now().Format("2006-01-02, 15:04:05")),
+	)
 	todos, err := h.todoService.GetTodos()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,4 +68,14 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.todoTemplate.Execute(w, r, row)
+}
+
+func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	err := h.todoService.DeleteTodo(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	w.Write([]byte(""))
 }

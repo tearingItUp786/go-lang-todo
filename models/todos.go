@@ -23,7 +23,7 @@ func NewBaseModel(db *sql.DB) *BaseModel {
 }
 
 func (b *BaseModel) GetTodos() ([]ToDo, error) {
-	rows, _ := b.db.Query("SELECT * FROM todo")
+	rows, _ := b.db.Query("SELECT * FROM todo order by id desc;")
 	defer rows.Close()
 	// print rows as json
 	todos := []ToDo{}
@@ -60,4 +60,12 @@ func (b *BaseModel) ToggleTodo(todoId string) (ToDo, error) {
 		return ToDo{}, err
 	}
 	return todo, nil
+}
+
+func (b *BaseModel) DeleteTodo(todoId string) error {
+	_, err := b.db.Exec(`DELETE FROM todo where id = $1`, todoId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
