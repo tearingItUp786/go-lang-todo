@@ -1,0 +1,6 @@
+  <div
+  {{ if .Done }} hx-swap-oob="afterbegin:#complete-list" {{ end }}
+  {{ if not  .Done }} hx-swap-oob="afterbegin:#incomplete-list" {{ end }}
+  >
+    {{ template "todo-item" . }}
+  </div>

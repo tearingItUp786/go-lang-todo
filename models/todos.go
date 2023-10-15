@@ -34,7 +34,6 @@ func (b *BaseModel) GetTodos() ([]ToDo, error) {
 			log.Fatal(err)
 		}
 		todos = append(todos, todo)
-		fmt.Printf("%d is %v and %v \n", todo.Id, todo.Text, todo.Done)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -52,13 +51,13 @@ func (b *BaseModel) InsertToDo(todo string) {
 	}
 }
 
-func (b *BaseModel) ToggleTodo(todoId string) error {
-	_, err := b.db.Exec(`UPDATE todo
-			SET done = NOT done-- or any other value you want to set
-			WHERE id = $1;`, todoId)
+func (b *BaseModel) ToggleTodo(todoId string) (ToDo, error) {
+	todo := ToDo{}
+	err := b.db.QueryRow(`UPDATE todo
+			SET done = NOT done
+			WHERE id = $1 RETURNING *;`, todoId).Scan(&todo.Id, &todo.Text, &todo.Done)
 	if err != nil {
-		return err
+		return ToDo{}, err
 	}
-
-	return nil
+	return todo, nil
 }

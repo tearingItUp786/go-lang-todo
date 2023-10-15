@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -14,6 +13,7 @@ import (
 type BaseHandler struct {
 	todoService  *models.BaseModel
 	homeTemplate Template
+	todoTemplate Template
 }
 
 type BaseHandlerInput struct {
@@ -22,12 +22,20 @@ type BaseHandlerInput struct {
 
 // NewBaseHandler returns a new BaseHandler
 func NewTodoContaroller(baseInput BaseHandlerInput) *BaseHandler {
+	homeTemplate := views.Must(views.ParseFS(
+		templates.FS,
+		"index.gohtml", "template.gohtml", "todo/normal.gohtml",
+	))
+
+	todoTemplate := views.Must(views.ParseFS(
+		templates.FS,
+		"render.gohtml", "todo/normal.gohtml",
+	))
+
 	return &BaseHandler{
-		todoService: baseInput.TodoService,
-		homeTemplate: views.Must(views.ParseFS(
-			templates.FS,
-			"index.gohtml", "template.gohtml", "todo/normal.gohtml",
-		)),
+		todoService:  baseInput.TodoService,
+		homeTemplate: homeTemplate,
+		todoTemplate: todoTemplate,
 	}
 }
 
@@ -40,7 +48,6 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	fmt.Println(todos)
 
 	data := Data{
 		ToDos: todos,
@@ -50,8 +57,10 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 
 func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	err := h.todoService.ToggleTodo(id)
+	row, err := h.todoService.ToggleTodo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+
+	h.todoTemplate.Execute(w, r, row)
 }

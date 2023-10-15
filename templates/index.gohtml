@@ -4,12 +4,12 @@
   <h1 class="py-4 text-4xl semibold tracking-tight">
     Welcome to my awesome site!
   </h1>
-  <div class="md:flex md:flex-column">
+  <div id="all-lists" class="md:flex md:flex-column">
 
     <div class="w-full  pr-3">
       {{if gt (len .ToDos) 0}}
         <h2 class="text-3xl mb-4">Remaining tasks</h2>
-        <ul>
+        <ul id="incomplete-list">
           {{range .ToDos}}
               {{ if not  .Done }}
                   {{ template "todo-item" . }}
@@ -22,7 +22,7 @@
     <div class="w-full pl-3">
       {{if gt (len .ToDos) 0}}
         <h2 class="text-3xl mb-4">Completed tasks</h2>
-        <ul>
+        <ul id="complete-list">
           {{range .ToDos}}
               {{ if .Done }}
                 {{ template "todo-item" . }}
