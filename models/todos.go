@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 )
 
@@ -75,22 +74,29 @@ func (b *BaseModel) UpdateSingleToDo(todoId string, text string, done bool) (ToD
 	return todo, nil
 }
 
-func (b *BaseModel) InsertToDo(todo string) {
-	_, err := b.db.Exec("INSERT INTO todo (text, done) VALUES ($1, $2)", todo, false)
-	if err != nil {
-		fmt.Println(err)
+func (b *BaseModel) InsertToDo(todoText string) (*ToDo, error) {
+	todo := ToDo{}
+	row := b.db.QueryRow(
+		"INSERT INTO todo (text, done) VALUES ($1, $2) RETURNING *;",
+		todoText,
+		false,
+	)
+	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
+		return nil, err
 	}
+
+	return &todo, nil
 }
 
-func (b *BaseModel) ToggleTodo(todoId string) (ToDo, error) {
+func (b *BaseModel) ToggleTodo(todoId string) (*ToDo, error) {
 	todo := ToDo{}
 	err := b.db.QueryRow(`UPDATE todo
 			SET done = NOT done
 			WHERE id = $1 RETURNING *;`, todoId).Scan(&todo.Id, &todo.Text, &todo.Done)
 	if err != nil {
-		return ToDo{}, err
+		return nil, err
 	}
-	return todo, nil
+	return &todo, nil
 }
 
 func (b *BaseModel) DeleteTodo(todoId string) error {

@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/tearingItUp786/go-lang-todo/models"
@@ -62,9 +61,6 @@ type Data struct {
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
-	h.todoService.InsertToDo(
-		fmt.Sprintf("Hello World %v", time.Now().Format("2006-01-02, 15:04:05")),
-	)
 	todos, err := h.todoService.GetTodos()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -84,6 +80,15 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 	h.homeTemplate.Execute(w, r, data)
 }
 
+func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
+	todoText := r.FormValue("todo-text")
+	_, err := h.todoService.InsertToDo(todoText)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	h.GetToDos(w, r)
+}
+
 func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	row, err := h.todoService.ToggleTodo(id)
@@ -91,7 +96,7 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(row))
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(*row))
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +133,7 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	toDoDoneAsBool := newToDoDone == "true"
 	newToDoText := r.FormValue("todo-text")
 
-	if newToDoText == "" {
+	if newToDoText == "error" {
 		enhancedToDo.Error = true
 
 		h.todoTemplate.ExecuteTemplate(

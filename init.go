@@ -41,6 +41,7 @@ func main() {
 	router := chi.NewRouter()
 	router.Get("/", todoController.GetToDos)
 
+	router.Post("/new", todoController.NewTodo)
 	router.Delete("/{id}", todoController.DeleteTodo)
 	router.Patch("/{id}/toggle", todoController.ToggleTodo)
 	router.Get("/{id}/edit", todoController.GetEditToDo)
