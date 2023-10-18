@@ -74,7 +74,7 @@ func (b *BaseModel) UpdateSingleToDo(todoId string, text string, done bool) (ToD
 	return todo, nil
 }
 
-func (b *BaseModel) InsertToDo(todoText string) (*ToDo, error) {
+func (b *BaseModel) InsertToDo(todoText string) (*ToDo, int, error) {
 	todo := ToDo{}
 	row := b.db.QueryRow(
 		"INSERT INTO todo (text, done) VALUES ($1, $2) RETURNING *;",
@@ -82,10 +82,18 @@ func (b *BaseModel) InsertToDo(todoText string) (*ToDo, error) {
 		false,
 	)
 	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &todo, nil
+	todoCount := b.db.QueryRow("SELECT COUNT(*) FROM todo;")
+
+	var count int
+	err := todoCount.Scan(&count)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return &todo, count, nil
 }
 
 func (b *BaseModel) ToggleTodo(todoId string) (*ToDo, error) {

@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -22,7 +21,7 @@ type BaseHandlerInput struct {
 }
 
 // NewBaseHandler returns a new BaseHandler
-func NewTodoContaroller(baseInput BaseHandlerInput) *BaseHandler {
+func NewTodoController(baseInput BaseHandlerInput) *BaseHandler {
 	homeTemplate := views.Must(views.ParseFS(
 		templates.FS,
 		"index.gohtml", "template.gohtml", "todo-templates.gohtml",
@@ -68,12 +67,10 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 
 	enhancedToDos := []EnhancedToDo{}
 	for _, todo := range todos {
-		fmt.Println(todo)
 		todo := NewEnhancedToDo(todo)
 		enhancedToDos = append(enhancedToDos, todo)
 	}
 
-	fmt.Println(enhancedToDos)
 	data := Data{
 		ToDos: enhancedToDos,
 	}
@@ -82,11 +79,20 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 
 func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 	todoText := r.FormValue("todo-text")
-	_, err := h.todoService.InsertToDo(todoText)
+	row, count, err := h.todoService.InsertToDo(todoText)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	h.GetToDos(w, r)
+
+	// let's get the base html if we just added "one" todo
+	if count <= 1 {
+		h.GetToDos(w, r)
+		return
+	}
+
+	// we have a bunch of todos and we only want to swap out the
+	// content inside of the incomplete list
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(*row))
 }
 
 func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
@@ -130,12 +136,11 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	enhancedToDo := NewEnhancedToDo(oldToDo)
 
 	newToDoDone := r.FormValue("todo-done")
-	toDoDoneAsBool := newToDoDone == "true"
 	newToDoText := r.FormValue("todo-text")
+	toDoDoneAsBool := newToDoDone == "true"
 
 	if newToDoText == "error" {
 		enhancedToDo.Error = true
-
 		h.todoTemplate.ExecuteTemplate(
 			w,
 			r,

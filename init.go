@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 	"github.com/tearingItUp786/go-lang-todo/controllers"
+	"github.com/tearingItUp786/go-lang-todo/migrations"
 	"github.com/tearingItUp786/go-lang-todo/models"
 )
 
@@ -33,19 +34,30 @@ func main() {
 
 	defer db.Close()
 
+	err = models.MigrateFS(db, migrations.FS, ".")
+	if err != nil {
+		panic(err)
+	}
+
 	todoService := models.NewBaseModel(db)
-	todoController := controllers.NewTodoContaroller(
+	todoController := controllers.NewTodoController(
 		controllers.BaseHandlerInput{TodoService: todoService},
 	)
 
 	router := chi.NewRouter()
-	router.Get("/", todoController.GetToDos)
 
+	router.Get("/", todoController.GetToDos)
 	router.Post("/new", todoController.NewTodo)
-	router.Delete("/{id}", todoController.DeleteTodo)
-	router.Patch("/{id}/toggle", todoController.ToggleTodo)
-	router.Get("/{id}/edit", todoController.GetEditToDo)
-	router.Patch("/{id}/edit", todoController.PatchEditToDo)
+
+	subRouter := chi.NewRouter()
+	subRouter.Route("/{id}", func(r chi.Router) {
+		r.Delete("/", todoController.DeleteTodo)
+		r.Patch("/toggle", todoController.ToggleTodo)
+		r.Get("/edit", todoController.GetEditToDo)
+		r.Patch("/edit", todoController.PatchEditToDo)
+	})
+
+	router.Mount("/", subRouter)
 
 	port := os.Getenv("PORT")
 
