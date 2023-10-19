@@ -136,20 +136,19 @@ func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 
 func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-
 	oldToDo, err := h.todoService.GetSingleToDo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
 	enhancedToDo := NewEnhancedToDo(oldToDo)
-
 	newToDoDone := r.FormValue("todo-done")
 	newToDoText := r.FormValue("todo-text")
 	toDoDoneAsBool := newToDoDone == "true"
 
 	if newToDoText == "error" {
 		enhancedToDo.Error = true
+
 		h.todoTemplate.ExecuteTemplate(
 			w,
 			r,
@@ -165,8 +164,8 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-	if oldToDo.Done != todo.Done {
 
+	if oldToDo.Done != todo.Done {
 		h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", enhancedToDo)
 		return
 	}

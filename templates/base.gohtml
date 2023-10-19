@@ -128,7 +128,12 @@
 {{ end }}
 
 {{ define "todo-lists" }}
-  <div id="all-lists" class="md:flex md:flex-column">
+  <div id="all-lists" class="lg:flex lg:flex-column">
+  {{ if eq (len .ToDos) 0 }}
+      <div class="w-full">
+        <h1>Why not add a todo? 😊</h1>  
+      </div>
+  {{ end }}
     <div class="w-full  pr-3">
       {{if gt (len .ToDos) 0}}
         <h2 class="text-3xl mb-4">Remaining tasks</h2>
@@ -142,7 +147,7 @@
       {{end}}
     </div>
 
-    <div class="w-full md:pl-3">
+    <div class="w-full lg:pl-3">
       {{if gt (len .ToDos) 0}}
         <h2 class="text-3xl mb-4">Completed tasks</h2>
         <ul id="complete-list">
