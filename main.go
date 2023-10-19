@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +13,9 @@ import (
 	"github.com/tearingItUp786/go-lang-todo/migrations"
 	"github.com/tearingItUp786/go-lang-todo/models"
 )
+
+//go:embed static/*
+var staticFiles embed.FS
 
 func main() {
 	env := os.Getenv("FOO_ENV")
@@ -65,6 +69,9 @@ func main() {
 	})
 
 	router.Mount("/", subRouter)
+
+	fileServer := http.FileServer(http.FS(staticFiles))
+	router.Handle("/static/*", http.StripPrefix("/static/", fileServer))
 
 	port := os.Getenv("PORT")
 

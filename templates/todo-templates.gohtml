@@ -1,6 +1,7 @@
 {{ define "todo-item" }}
   <li 
   id="todo-{{ .Id }}"
+  hx-on::after-settle="document.getElementById(`edit-button-{{ .Id }}`).focus()"
   class="
   flex flex-wrap border-2 border-gray-500 p-2 rounded-lg 
   mb-4
@@ -26,6 +27,7 @@
 
     <div>
       <button 
+        id="edit-button-{{ .Id }}"
         hx-get="/{{ .Id }}/edit"
         hx-swap="outerHTML"
         hx-target="#todo-{{.Id }}"
