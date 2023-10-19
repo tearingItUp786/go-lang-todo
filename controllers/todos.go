@@ -24,12 +24,12 @@ type BaseHandlerInput struct {
 func NewTodoController(baseInput BaseHandlerInput) *BaseHandler {
 	homeTemplate := views.Must(views.ParseFS(
 		templates.FS,
-		"index.gohtml", "template.gohtml", "todo-templates.gohtml",
+		"index.gohtml", "template.gohtml", "base.gohtml", "todo-templates.gohtml",
 	))
 
 	todoTemplate := views.Must(views.ParseFS(
 		templates.FS,
-		"todo-templates.gohtml",
+		"base.gohtml", "todo-templates.gohtml",
 	))
 
 	return &BaseHandler{
@@ -84,15 +84,20 @@ func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
+	enhancedRow := NewEnhancedToDo(*row)
 	// let's get the base html if we just added "one" todo
 	if count <= 1 {
-		h.GetToDos(w, r)
+		data := Data{
+			ToDos: []EnhancedToDo{enhancedRow},
+		}
+		h.todoTemplate.ExecuteTemplate(w, r, "add-new-todo-swap", data)
+		// h.GetToDos(w, r)
 		return
 	}
 
 	// we have a bunch of todos and we only want to swap out the
 	// content inside of the incomplete list
-	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(*row))
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", enhancedRow)
 }
 
 func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
@@ -107,12 +112,16 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	err := h.todoService.DeleteTodo(id)
+	count, err := h.todoService.DeleteTodo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	if count > 0 {
+		w.Write([]byte(""))
+		return
+	}
 
-	w.Write([]byte(""))
+	h.todoTemplate.ExecuteTemplate(w, r, "empty-list", nil)
 }
 
 func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {

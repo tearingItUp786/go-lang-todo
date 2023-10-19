@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE todo (
   id SERIAL PRIMARY KEY,
-  text TEXT UNIQUE NOT NULL,
+  text TEXT NOT NULL,
   done boolean
 );
 -- +goose StatementEnd

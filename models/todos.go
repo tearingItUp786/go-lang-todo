@@ -107,10 +107,19 @@ func (b *BaseModel) ToggleTodo(todoId string) (*ToDo, error) {
 	return &todo, nil
 }
 
-func (b *BaseModel) DeleteTodo(todoId string) error {
-	_, err := b.db.Exec(`DELETE FROM todo where id = $1`, todoId)
+func (b *BaseModel) DeleteTodo(todoId string) (int, error) {
+	// Deleting the specified todo
+	_, err := b.db.Exec("DELETE FROM todo WHERE id = $1", todoId)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+
+	// Getting the count of remaining todos
+	var remainingCount int
+	err = b.db.QueryRow("SELECT COUNT(*) FROM todo").Scan(&remainingCount)
+	if err != nil {
+		return 0, err
+	}
+
+	return remainingCount, nil
 }

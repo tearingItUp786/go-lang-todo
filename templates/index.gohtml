@@ -1,91 +1,9 @@
 <div id="page-container">
 {{template "header" .}}
-  <script type="text/javascript">
-      function stoppedTyping(){
-          let submitButton =  document.getElementById('submit-new')
-          this.value.length > 0 ? submitButton.disabled = false : submitButton.disabled = true;
-      }
-
-      function resetForm() {
-        this.reset();
-        document.getElementById('submit-new').disabled = true;
-      }
-  </script>
 
   <div class="px-6">
-      <div>
-          <form 
-            id="new-todo-form"
-            hx-post="/new" 
-            hx-swap="{{if gt (len .ToDos) 0}}none{{else}}outerHTML{{end}}"
-            hx-on::after-request="resetForm.apply(this)"
-            {{if lt (len .ToDos) 1}}
-              hx-target="#page-container"
-            {{end}}
-          >
-          <div class="mt-4 mb-6">
-            <div class="">
-                <label 
-                    id="todo-label"
-                    for="todo-text"
-                    class="w-full text-3xl mb-4 block">
-                Add a new task
-                </label>
-                  <input 
-                    name="todo-text"
-                    onkeyup="change:stoppedTyping.call(this)"
-                    type="text" 
-                    class="mb-4 max-w-[300px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " 
-                    required
-                    placeholder="Add a new task"
-                  >
-
-            </div>
-
-            <div>
-              <button 
-                disabled
-                id="submit-new"
-                type="submit"
-                class="
-                disabled:pointer-events-none disabled:opacity-50
-                bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-              >
-                Submit
-              </button>
-            </div>
-          </div>
-          </form>
-      </div>
-    <div id="all-lists" class="md:flex md:flex-column">
-
-      <div class="w-full  pr-3">
-        {{if gt (len .ToDos) 0}}
-          <h2 class="text-3xl mb-4">Remaining tasks</h2>
-          <ul id="incomplete-list">
-            {{range .ToDos}}
-                {{ if not  .Done }}
-                    {{ template "todo-item" . }}
-                {{ end }}
-            {{end}}
-          </ul>
-        {{end}}
-      </div>
-
-      <div class="w-full pl-3">
-        {{if gt (len .ToDos) 0}}
-          <h2 class="text-3xl mb-4">Completed tasks</h2>
-          <ul id="complete-list">
-            {{range .ToDos}}
-                {{ if .Done }}
-                  {{ template "todo-item" . }}
-                {{ end }}
-            {{end}}
-          </ul>
-        {{end}}
-      </div>
-
-    </div>
+    {{ template "server-load-form" . }}
+    {{ template "todo-lists" . }}
   </div>
 {{template "footer" .}}
 </div>
