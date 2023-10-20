@@ -31,13 +31,14 @@ func (b *BaseModel) GetTodos() ([]ToDo, error) {
 		var todo ToDo
 		if err := rows.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
 			log.Fatal(err)
+			return []ToDo{}, err
 		}
 		todos = append(todos, todo)
 	}
 
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
-		panic(err)
+		return []ToDo{}, err
 	}
 
 	return todos, nil
@@ -51,11 +52,13 @@ func (b *BaseModel) GetSingleToDo(todoId string) (ToDo, error) {
 
 	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
 		log.Fatal(err)
+		return ToDo{}, err
 	}
 
 	if err := row.Err(); err != nil {
 		log.Fatal(err)
-		panic(err)
+		return ToDo{}, err
+
 	}
 
 	return todo, nil
@@ -64,17 +67,19 @@ func (b *BaseModel) GetSingleToDo(todoId string) (ToDo, error) {
 func (b *BaseModel) UpdateSingleToDo(todoId string, text string, done bool) (ToDo, error) {
 	todo := ToDo{}
 
-	err := b.db.QueryRow(`UPDATE todo
+	row := b.db.QueryRow(`UPDATE todo
 			SET text = $1, done = $2
-			WHERE id = $3 RETURNING *;`, text, done, todoId).Scan(&todo.Id, &todo.Text, &todo.Done)
-	if err != nil {
+			WHERE id = $3 RETURNING *;`, text, done, todoId)
+
+	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
+		log.Fatal(err)
 		return ToDo{}, err
 	}
 
 	return todo, nil
 }
 
-func (b *BaseModel) InsertToDo(todoText string) (*ToDo, int, error) {
+func (b *BaseModel) InsertToDo(todoText string) (ToDo, int, error) {
 	todo := ToDo{}
 	row := b.db.QueryRow(
 		"INSERT INTO todo (text, done) VALUES ($1, $2) RETURNING *;",
@@ -82,7 +87,7 @@ func (b *BaseModel) InsertToDo(todoText string) (*ToDo, int, error) {
 		false,
 	)
 	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
-		return nil, 0, err
+		return ToDo{}, 0, err
 	}
 
 	todoCount := b.db.QueryRow("SELECT COUNT(*) FROM todo;")
@@ -90,21 +95,22 @@ func (b *BaseModel) InsertToDo(todoText string) (*ToDo, int, error) {
 	var count int
 	err := todoCount.Scan(&count)
 	if err != nil {
-		return nil, 0, err
+		return ToDo{}, 0, err
 	}
 
-	return &todo, count, nil
+	return todo, count, nil
 }
 
-func (b *BaseModel) ToggleTodo(todoId string) (*ToDo, error) {
+func (b *BaseModel) ToggleTodo(todoId string) (ToDo, error) {
 	todo := ToDo{}
-	err := b.db.QueryRow(`UPDATE todo
+	row := b.db.QueryRow(`UPDATE todo
 			SET done = NOT done
-			WHERE id = $1 RETURNING *;`, todoId).Scan(&todo.Id, &todo.Text, &todo.Done)
-	if err != nil {
-		return nil, err
+			WHERE id = $1 RETURNING *;`, todoId)
+
+	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
+		return ToDo{}, err
 	}
-	return &todo, nil
+	return todo, nil
 }
 
 func (b *BaseModel) DeleteTodo(todoId string) (int, error) {
@@ -116,8 +122,9 @@ func (b *BaseModel) DeleteTodo(todoId string) (int, error) {
 
 	// Getting the count of remaining todos
 	var remainingCount int
-	err = b.db.QueryRow("SELECT COUNT(*) FROM todo").Scan(&remainingCount)
-	if err != nil {
+	row := b.db.QueryRow("SELECT COUNT(*) FROM todo")
+
+	if err := row.Scan(&remainingCount); err != nil {
 		return 0, err
 	}
 

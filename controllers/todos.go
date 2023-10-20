@@ -84,7 +84,7 @@ func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	enhancedRow := NewEnhancedToDo(*row)
+	enhancedRow := NewEnhancedToDo(row)
 	// let's get the base html if we just added "one" todo
 	if count <= 1 {
 		data := Data{
@@ -107,7 +107,7 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
-	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(*row))
+	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(row))
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
