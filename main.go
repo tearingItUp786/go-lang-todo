@@ -12,6 +12,7 @@ import (
 	"github.com/tearingItUp786/go-lang-todo/controllers"
 	"github.com/tearingItUp786/go-lang-todo/migrations"
 	"github.com/tearingItUp786/go-lang-todo/models"
+	"golang.org/x/tools/godoc/static"
 )
 
 //go:embed static/*
@@ -70,7 +71,7 @@ func main() {
 
 	router.Mount("/", subRouter)
 	// Serve the embedded static files
-	fileServer := http.FileServer(http.FS(staticFiles))
+	fileServer := http.FileServer(http.FS(static.FS))
 	router.Handle("/static/*", fileServer)
 
 	port := os.Getenv("PORT")
