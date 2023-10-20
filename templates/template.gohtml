@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
@@ -25,6 +24,11 @@
 {{end}}
     <!-- Each page's content goes here. -->
 {{define "footer"}}
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+          event.detail.headers['X-CSRF-Token'] = '{{ csrfField | unescapeHTML }}';
+        })
+    </script>
   </body>
 </html>
 {{end}}

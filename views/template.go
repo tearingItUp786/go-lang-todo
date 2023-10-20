@@ -8,6 +8,8 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+
+	"github.com/gorilla/csrf"
 )
 
 func Must(t Template, err error) Template {
@@ -19,6 +21,16 @@ func Must(t Template, err error) Template {
 
 func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 	tpl := template.New(patterns[0])
+	tpl = tpl.Funcs(
+		template.FuncMap{
+			"unescapeHTML": func(s string) template.HTML {
+				return template.HTML(s)
+			},
+			"csrfField": func() (template.HTML, error) {
+				return "", fmt.Errorf("csrfField not implemented")
+			},
+		},
+	)
 	tpl, err := tpl.ParseFS(fs, patterns...)
 	if err != nil {
 		return Template{}, fmt.Errorf("parsing template: %w", err)
@@ -39,6 +51,21 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 		http.Error(w, "There was an error rendering the page.", http.StatusInternalServerError)
 		return
 	}
+
+	token := csrf.Token(r)
+
+	tpl = tpl.Funcs(
+		template.FuncMap{
+			"unescapeHTML": func(s string) template.HTML {
+				return template.HTML(s)
+			},
+			"csrfField": func() string {
+				return token
+			},
+		},
+	)
+
+	w.Header().Set("X-CSRF-Token", token)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	var buf bytes.Buffer

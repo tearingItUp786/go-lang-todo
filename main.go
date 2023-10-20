@@ -8,11 +8,11 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 	"github.com/tearingItUp786/go-lang-todo/controllers"
 	"github.com/tearingItUp786/go-lang-todo/migrations"
 	"github.com/tearingItUp786/go-lang-todo/models"
-	"golang.org/x/tools/godoc/static"
 )
 
 //go:embed static/*
@@ -39,6 +39,11 @@ func main() {
 		Database: os.Getenv("PSQL_DATABASE"),
 		SSLMode:  os.Getenv("PSQL_SSLMODE"),
 	})
+
+	// todo: get this from env
+	csrfKey := os.Getenv("CSRF_KEY")
+	csrfSecure := os.Getenv("CSRF_SECURE") == "true"
+
 	if err != nil {
 		fmt.Println(err)
 		log.Fatal("Error connecting to database")
@@ -51,13 +56,19 @@ func main() {
 		panic(err)
 	}
 
+	csrfMw := csrf.Protect(
+		[]byte(csrfKey),
+		csrf.Secure(csrfSecure),
+	)
 	todoService := models.NewBaseModel(db)
+
 	todoController := controllers.NewTodoController(
 		controllers.BaseHandlerInput{TodoService: todoService},
 	)
 
 	router := chi.NewRouter()
 
+	router.Use(csrfMw)
 	router.Get("/", todoController.GetToDos)
 	router.Post("/new", todoController.NewTodo)
 
@@ -71,7 +82,7 @@ func main() {
 
 	router.Mount("/", subRouter)
 	// Serve the embedded static files
-	fileServer := http.FileServer(http.FS(static.FS))
+	fileServer := http.FileServer(http.FS(staticFiles))
 	router.Handle("/static/*", fileServer)
 
 	port := os.Getenv("PORT")
