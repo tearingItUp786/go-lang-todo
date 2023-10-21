@@ -91,8 +91,6 @@ func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 			ToDos: []EnhancedToDo{enhancedRow},
 		}
 		h.todoTemplate.ExecuteTemplate(w, r, "add-new-todo-swap", data)
-		// h.GetToDos(w, r)
-		return
 	}
 
 	// we have a bunch of todos and we only want to swap out the
@@ -108,6 +106,15 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(row))
+}
+
+func (h *BaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
+	err := h.todoService.DeleteAll()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	h.todoTemplate.ExecuteTemplate(w, r, "empty-list", nil)
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {

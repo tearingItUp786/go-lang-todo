@@ -73,6 +73,7 @@ func main() {
 
 	router.Use(csrfMw)
 	router.Get("/", todoController.GetToDos)
+	router.Delete("/", todoController.DeleteAll)
 	router.Post("/new", todoController.NewTodo)
 
 	subRouter := chi.NewRouter()

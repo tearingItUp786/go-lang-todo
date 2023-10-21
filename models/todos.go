@@ -130,3 +130,13 @@ func (b *BaseModel) DeleteTodo(todoId string) (int, error) {
 
 	return remainingCount, nil
 }
+
+func (b *BaseModel) DeleteAll() error {
+	// Deleting the specified todo
+	_, err := b.db.Exec("DELETE FROM todo")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

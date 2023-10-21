@@ -5,11 +5,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
-      my-modal:not(:defined) { display: none; }
+      *:not(:defined) {
+        display: none;
+      }
     </style>
+    <link href="/dist/style.css?={{ timeNow }}" rel="stylesheet" />
     <script type="module" src="/dist/bundle.js?={{ timeNow }}"></script>
     <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon-48.png" />
@@ -24,7 +26,12 @@
     <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
       <nav class="px-8 justify-between py-6 flex items-center space-x-12">
         <div class="text-4xl font-serif">Todo list</div>
-        <my-button></my-button>
+        <div id="modal-button-container">
+          <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
+          {{if gt (len .ToDos) 0}}
+            <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
+          {{end}}
+        </div>
       </nav>
     </header>
 {{end}}
@@ -35,13 +42,24 @@
           event.detail.headers['X-CSRF-Token'] = '{{ csrfField | unescapeHTML }}';
         })
     </script>
-    <my-modal id="modal" title="Bulk upload some todos">
+    <my-modal id="bulkModal" title="Bulk upload some todos">
       <div 
         class="mb-4"
         slot="content"
       >
         <h1>Let's bulk add some todos with a CSV</h1>
       </div>
+    </my-modal>
+    <my-modal id="deleteModal" title="Delete all todos">
+      <div 
+        class="mb-4"
+        slot="content"
+      >
+        <p>Do you want to delete all the todos?</p>
+      </div>
+      <my-button class="mr-4" slot="action" hx-swap="none"  hx-delete="/">
+        Delete all
+      </my-button>
     </my-modal>
   </body>
 </html>

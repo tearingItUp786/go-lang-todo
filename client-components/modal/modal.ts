@@ -33,19 +33,21 @@ export class MyModal extends TailwindElement(styles) {
   }
 
   handleQueryParamChange = () => {
-    console.log("handleQueryParamChange", window.location.search);
     const searchParams = new URLSearchParams(window.location.search);
-    this.isOpen = searchParams.get("isOpen") === "true";
+    this.isOpen = searchParams.get(this.id) === "true";
     this.requestUpdate();
   };
 
-  updated() {
-    const test = this.shadowRoot?.getElementById("container");
+  createRenderRoot() {
+    const root = super.createRenderRoot();
 
-    test?.addEventListener("click", (_: any) => {
+    root.addEventListener("click", (e: Event) => {
+      if ((e.target as Element).id !== "container") return;
       window.history.replaceState({}, "", window.location.pathname);
       this.isOpen = false;
     });
+
+    return root;
   }
 
   handleEscapeKey(event: any) {
@@ -68,6 +70,13 @@ export class MyModal extends TailwindElement(styles) {
         <slot name="content"></slot>
 
         <div class="flex justify-end">
+          <slot
+            @click="${() => {
+              window.history.replaceState({}, "", window.location.pathname);
+              this.isOpen = !this.isOpen;
+            }}"
+            name="action"
+          ></slot>
           <button
             @click="${() => {
               window.history.replaceState({}, "", window.location.pathname);
@@ -75,7 +84,7 @@ export class MyModal extends TailwindElement(styles) {
             }}"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
-            Close For Fun
+            Close
           </button>
         </div>
       </div>
@@ -84,5 +93,3 @@ export class MyModal extends TailwindElement(styles) {
     `;
   }
 }
-
-// }
