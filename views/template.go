@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/csrf"
 )
@@ -23,6 +24,9 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 	tpl := template.New(patterns[0])
 	tpl = tpl.Funcs(
 		template.FuncMap{
+			"timeNow": func() (string, error) {
+				return "", fmt.Errorf("timeNow not implemented")
+			},
 			"unescapeHTML": func(s string) template.HTML {
 				return template.HTML(s)
 			},
@@ -56,6 +60,11 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 
 	tpl = tpl.Funcs(
 		template.FuncMap{
+			"timeNow": func() (string, error) {
+				version := time.Now().Unix()
+				timeString := fmt.Sprintf("%d", version)
+				return timeString, nil
+			},
 			"unescapeHTML": func(s string) template.HTML {
 				return template.HTML(s)
 			},

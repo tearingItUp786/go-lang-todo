@@ -18,6 +18,9 @@ import (
 //go:embed static/*
 var staticFiles embed.FS
 
+//go:embed dist/*
+var jsComponents embed.FS
+
 func main() {
 	env := os.Getenv("FOO_ENV")
 	if "" == env {
@@ -84,6 +87,10 @@ func main() {
 	// Serve the embedded static files
 	fileServer := http.FileServer(http.FS(staticFiles))
 	router.Handle("/static/*", fileServer)
+
+	// Serve the embedded static files
+	distFileServer := http.FileServer(http.FS(jsComponents))
+	router.Handle("/dist/*", distFileServer)
 
 	port := os.Getenv("PORT")
 

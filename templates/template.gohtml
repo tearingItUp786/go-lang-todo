@@ -4,8 +4,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      my-modal:not(:defined) { display: none; }
+    </style>
+    <script type="module" src="/dist/bundle.js?={{ timeNow }}"></script>
     <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon-48.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
@@ -17,8 +22,9 @@
   </head>
   <body class="h-screen bg-gray-100">
     <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
-      <nav class="px-8 py-6 flex items-center space-x-12">
+      <nav class="px-8 justify-between py-6 flex items-center space-x-12">
         <div class="text-4xl font-serif">Todo list</div>
+        <my-button></my-button>
       </nav>
     </header>
 {{end}}
@@ -29,6 +35,14 @@
           event.detail.headers['X-CSRF-Token'] = '{{ csrfField | unescapeHTML }}';
         })
     </script>
+    <my-modal id="modal" title="Bulk upload some todos">
+      <div 
+        class="mb-4"
+        slot="content"
+      >
+        <h1>Let's bulk add some todos with a CSV</h1>
+      </div>
+    </my-modal>
   </body>
 </html>
 {{end}}
