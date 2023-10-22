@@ -215,12 +215,14 @@ func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 
 	// You can also write the CSV data to a file if needed
 	// writeFile(records)
-	todos, err := h.todoService.BulkInsertToDos(bulkTodos)
+	_, err = h.todoService.BulkInsertToDos(bulkTodos)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	todos, err := h.todoService.GetTodos()
 	enhancedToDos := []EnhancedToDo{}
 	for _, todo := range todos {
 		todo := NewEnhancedToDo(todo)
