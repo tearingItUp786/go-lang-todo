@@ -59,7 +59,8 @@ func NewEnhancedToDo(todo models.ToDo) EnhancedToDo {
 }
 
 type Data struct {
-	ToDos []EnhancedToDo
+	ToDos       []EnhancedToDo
+	HideButtons bool
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
@@ -74,9 +75,13 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 		enhancedToDos = append(enhancedToDos, todo)
 	}
 
+	hideButtons := r.URL.Query().Get("hideButtons")
+	fmt.Println(hideButtons)
 	data := Data{
-		ToDos: enhancedToDos,
+		ToDos:       enhancedToDos,
+		HideButtons: hideButtons == "true",
 	}
+
 	h.homeTemplate.Execute(w, r, data)
 }
 

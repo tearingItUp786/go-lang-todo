@@ -26,12 +26,14 @@
     <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
       <nav class="px-8 justify-between py-6 flex items-center space-x-12">
         <div class="text-4xl font-serif">Todo list</div>
-        <div id="modal-button-container">
-          <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
-          {{if gt (len .ToDos) 0}}
-            <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
-          {{end}}
-        </div>
+        {{ if not .HideButtons }}
+          <div id="modal-button-container">
+            <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
+            {{if gt (len .ToDos) 0}}
+              <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
+            {{end}}
+          </div>
+      {{ end }}
       </nav>
     </header>
 {{end}}
@@ -57,7 +59,10 @@
         <div class="w-full p-6 bg-white rounded shadow-md">
             <label for="csv" class="block text-sm font-medium text-gray-700">Upload CSV File</label>
             <div id="csv-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-              <div class="space-y-1 text-center">
+              <div id="csv-has-svg" class="hidden space-y-1 text-center">
+                <h1>Nice, you picked a csv: <span id="csv-title"></span></h1>
+              </div>
+              <div id="csv-svg" class="space-y-1 text-center">
                 <svg
                   class="mx-auto h-12 w-12 text-gray-400"
                   stroke="currentColor"
@@ -103,6 +108,9 @@
             const CLASS_TO_TOGGLE = "bg-gray-300";
             const csvDropzone = document.getElementById("csv-dropzone");
             const csvSubmitButton = document.getElementById("csv-submit-button");
+            const csvSvg = document.getElementById("csv-svg");
+            const csvHasSvg = document.getElementById("csv-has-svg");
+            const csvTitle = document.getElementById("csv-title")
 
             csvDropzone.addEventListener("dragover", function (event) {
                 event.preventDefault();
@@ -120,9 +128,12 @@
                 const csvFile = event.dataTransfer.files[0];
 
                 if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
-                    alert("csv file has been selected");
                     csvSubmitButton.disabled = false;
                     csvDropzone.classList.add(CLASS_TO_TOGGLE); // Add a class to the form
+                    csvSvg.classList.add('hidden');
+                    csvHasSvg.classList.remove('hidden');
+                    csvTitle.innerText = csvFile.name;
+
                 } else {
                     alert("Please drop a CSV file.");
                 }
@@ -134,9 +145,11 @@
                 const csvFile = event.target.files[0];
 
                 if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
-                    alert("CSV file has been selected");
+                    csvSvg.classList.add('hidden');
+                    csvHasSvg.classList.remove('hidden');
                     csvDropzone.classList.add(CLASS_TO_TOGGLE); // Add a class to the form
                     csvSubmitButton.disabled = false;
+                    csvTitle.innerText = csvFile.name;
                   
                 } else {
                     alert("Please choose a valid CSV file.");
@@ -146,11 +159,15 @@
             // Reset the background if the file input changes without selecting a file
             csvInput.addEventListener("click", function () {
                 csvSubmitButton.disabled = true;
+                csvSvg.classList.remove('hidden')
+                csvHasSvg.classList.add('hidden');
                 csvDropzone.classList.remove(CLASS_TO_TOGGLE);
             });
 
             function onClose() {
               csvSubmitButton.disabled = true;
+              csvHasSvg.classList.add('hidden');
+              csvSvg.classList.remove('hidden');
               csvDropzone.classList.remove(CLASS_TO_TOGGLE); // Add a class to the form
               csvInput.value = "";
             }
