@@ -38,6 +38,7 @@ To run the development environment, execute the following commands in order:
    ```shell
    npm run build:watch
    ```
+4. view the app at `localhost:8080`
 
 ## to do
 
