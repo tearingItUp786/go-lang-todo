@@ -125,9 +125,11 @@
       </form>
   </div>
   </div>
+  
   <div
-    hx-swap-oob="beforeend:#modal-button-container"
+    hx-swap-oob="innerHTML:#modal-button-container"
   >
+      <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
       <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
   </div>
 {{ end }}
