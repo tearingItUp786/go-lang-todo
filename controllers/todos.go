@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"encoding/csv"
+	"fmt"
+	"mime/multipart"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -178,4 +181,63 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.todoTemplate.ExecuteTemplate(w, r, "swap-single", enhancedToDo)
+}
+
+func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	err := r.ParseMultipartForm(32 << 20) // Max memory to allocate for the form data
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	file, _, err := r.FormFile("csv") // Name of the file input field in the form
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+	records, err := readCSV(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	// Process the CSV records
+	bulkTodos := []models.ToDo{}
+	for i := 1; i < len(records); i++ {
+		record := records[i]
+		fmt.Println(record)
+		done := record[1] == "true"
+		bulkTodos = append(bulkTodos, models.ToDo{Text: record[0], Done: done})
+	}
+
+	// You can also write the CSV data to a file if needed
+	// writeFile(records)
+	todos, err := h.todoService.BulkInsertToDos(bulkTodos)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	enhancedToDos := []EnhancedToDo{}
+	for _, todo := range todos {
+		todo := NewEnhancedToDo(todo)
+		enhancedToDos = append(enhancedToDos, todo)
+	}
+
+	data := Data{
+		ToDos: enhancedToDos,
+	}
+	h.todoTemplate.ExecuteTemplate(w, r, "add-new-todo-swap", data)
+}
+
+func readCSV(file multipart.File) ([][]string, error) {
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+	return records, nil
 }

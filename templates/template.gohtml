@@ -42,14 +42,51 @@
           event.detail.headers['X-CSRF-Token'] = '{{ csrfField | unescapeHTML }}';
         })
     </script>
+    <form 
+      hx-post="/bulk-upload"  
+      enctype="multipart/form-data"
+      hx-target="#all-lists"
+      hx-swap="outerHTML"                                 
+    >
     <my-modal id="bulkModal" title="Bulk upload some todos">
       <div 
         class="mb-4"
         slot="content"
       >
         <h1>Let's bulk add some todos with a CSV</h1>
+        <div class="w-full p-6 bg-white rounded shadow-md">
+            <label for="csv" class="block text-sm font-medium text-gray-700">Upload CSV File</label>
+            <div id="csv-dropzone" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+              <div class="space-y-1 text-center">
+                <svg
+                  class="mx-auto h-12 w-12 text-gray-400"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 48 48"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M37 20v-7a1 1 0 00-1-1H12a1 1 0 00-1 1v7h26zm3 6v10H8V26h32zm-1 1H9v8h30v-8zm-9-6v-3a1 1 0 00-1-1H18a1 1 0 00-1 1v3h12zm-8 1v10h8V21h-8z"
+                  ></path>
+                </svg>
+                <div class="flex text-sm text-gray-600">
+                  <label for="csv" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                    <span>Upload a CSV file</span>
+                    <input id="csv" name="csv" type="file" class="sr-only">
+                  </label>
+                  <p class="pl-1">or drag and drop</p>
+                </div>
+                <p class="text-xs text-gray-500">CSV up to 10MB</p>
+              </div>
+            </div>
+        </div>
       </div>
+      <my-button disabled id="csv-submit-button" type="submit" class="mr-4" slot="action">
+        Upload
+      </my-button>
     </my-modal>
+    </form>
+
     <my-modal id="deleteModal" title="Delete all todos">
       <div 
         class="mb-4"
@@ -61,6 +98,66 @@
         Delete all
       </my-button>
     </my-modal>
+
+       <script> 
+            const CLASS_TO_TOGGLE = "bg-gray-300";
+            const csvDropzone = document.getElementById("csv-dropzone");
+            const csvSubmitButton = document.getElementById("csv-submit-button");
+
+            csvDropzone.addEventListener("dragover", function (event) {
+                event.preventDefault();
+                csvDropzone.style.border = "2px dashed #4A5568";
+            });
+
+            csvDropzone.addEventListener("dragleave", function (event) {
+                event.preventDefault();
+                csvDropzone.style.border = "none";
+            });
+
+            csvDropzone.addEventListener("drop", function (event) {
+                event.preventDefault();
+                csvDropzone.style.border = "none";
+                const csvFile = event.dataTransfer.files[0];
+
+                if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
+                    alert("csv file has been selected");
+                    csvSubmitButton.disabled = false;
+                    csvDropzone.classList.add(CLASS_TO_TOGGLE); // Add a class to the form
+                } else {
+                    alert("Please drop a CSV file.");
+                }
+            });
+
+            const csvInput = document.getElementById("csv");
+
+            csvInput.addEventListener("change", function (event) {
+                const csvFile = event.target.files[0];
+
+                if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
+                    alert("CSV file has been selected");
+                    csvDropzone.classList.add(CLASS_TO_TOGGLE); // Add a class to the form
+                    csvSubmitButton.disabled = false;
+                  
+                } else {
+                    alert("Please choose a valid CSV file.");
+                }
+            });
+
+            // Reset the background if the file input changes without selecting a file
+            csvInput.addEventListener("click", function () {
+                csvSubmitButton.disabled = true;
+                csvDropzone.classList.remove(CLASS_TO_TOGGLE);
+            });
+
+            function onClose() {
+              csvSubmitButton.disabled = true;
+              csvDropzone.classList.remove(CLASS_TO_TOGGLE); // Add a class to the form
+              csvInput.value = "";
+            }
+
+          const modal = document.getElementById("bulkModal");
+          modal.onClose = onClose
+      </script>
   </body>
 </html>
 {{end}}

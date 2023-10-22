@@ -140,3 +140,30 @@ func (b *BaseModel) DeleteAll() error {
 
 	return nil
 }
+
+func (b *BaseModel) BulkInsertToDos(bulkTodos []ToDo) ([]ToDo, error) {
+	tx, err := b.db.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	stmt, err := tx.Prepare("INSERT INTO todo (text, done) VALUES ($1, $2)")
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+	var todos []ToDo
+	for _, bulkTodo := range bulkTodos {
+
+		_, err := stmt.Exec(bulkTodo.Text, false)
+		if err != nil {
+			return nil, err
+		}
+		todo := ToDo{Text: bulkTodo.Text, Done: bulkTodo.Done}
+		todos = append(todos, todo)
+	}
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return todos, nil
+}

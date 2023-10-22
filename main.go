@@ -75,6 +75,7 @@ func main() {
 	router.Get("/", todoController.GetToDos)
 	router.Delete("/", todoController.DeleteAll)
 	router.Post("/new", todoController.NewTodo)
+	router.Post("/bulk-upload", todoController.BulkUpload)
 
 	subRouter := chi.NewRouter()
 	subRouter.Route("/{id}", func(r chi.Router) {

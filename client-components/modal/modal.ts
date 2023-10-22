@@ -11,6 +11,10 @@ export class MyModal extends TailwindElement(styles) {
   @property({ type: Boolean, reflect: true })
   isOpen: boolean = false;
 
+  // give me an onClose function
+  @property({ type: Function, reflect: true })
+  onClose: Function | undefined;
+
   constructor() {
     super();
     this.handleQueryParamChange();
@@ -74,6 +78,7 @@ export class MyModal extends TailwindElement(styles) {
             @click="${() => {
               window.history.replaceState({}, "", window.location.pathname);
               this.isOpen = !this.isOpen;
+              this?.onClose?.();
             }}"
             name="action"
           ></slot>
@@ -81,6 +86,7 @@ export class MyModal extends TailwindElement(styles) {
             @click="${() => {
               window.history.replaceState({}, "", window.location.pathname);
               this.isOpen = !this.isOpen;
+              this?.onClose?.();
             }}"
             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
           >
