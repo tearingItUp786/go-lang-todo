@@ -43,6 +43,16 @@
         document.body.addEventListener('htmx:configRequest', (event) => {
           event.detail.headers['X-CSRF-Token'] = '{{ csrfField | unescapeHTML }}';
         })
+
+        let timeout = null;
+        document.body.addEventListener('htmx:responseError', (event) => {
+                clearTimeout(timeout);
+                const errorAlert = document.getElementById('errorAlert');
+                errorAlert.classList.remove('hidden');
+                timeout = setTimeout(() => {
+                    errorAlert.classList.add('hidden');
+                }, 3000); // Hide the alert after 3 seconds
+            });
     </script>
     <form 
       hx-post="/bulk-upload"  
@@ -103,7 +113,9 @@
         Delete all
       </my-button>
     </my-modal>
-
+       <div id="errorAlert" class="hidden fixed top-0 left-0 w-full bg-red-500 text-white text-center py-2">
+            Network request failed! Please try again later.
+        </div>
        <script> 
             const CLASS_TO_TOGGLE = "bg-gray-300";
             const csvDropzone = document.getElementById("csv-dropzone");
@@ -125,7 +137,7 @@
             csvDropzone.addEventListener("drop", function (event) {
                 event.preventDefault();
                 csvDropzone.style.border = "none";
-                const csvFile = event.dataTransfer.files[0];
+               const csvFile = event.dataTransfer.files[0];
 
                 if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
                     csvSubmitButton.disabled = false;

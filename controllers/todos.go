@@ -143,7 +143,9 @@ func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	todo, err := h.todoService.GetSingleToDo(id)
 	if err != nil {
+		fmt.Println("FUCK")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	h.todoTemplate.ExecuteTemplate(w, r, "edit-todo", todo)
@@ -154,6 +156,7 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	oldToDo, err := h.todoService.GetSingleToDo(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
 	enhancedToDo := NewEnhancedToDo(oldToDo)
@@ -228,6 +231,12 @@ func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	todos, err := h.todoService.GetTodos()
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	enhancedToDos := []EnhancedToDo{}
 	for _, todo := range todos {
 		todo := NewEnhancedToDo(todo)

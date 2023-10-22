@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"log"
 )
 
 type ToDo struct {
@@ -30,14 +29,12 @@ func (b *BaseModel) GetTodos() ([]ToDo, error) {
 	for rows.Next() {
 		var todo ToDo
 		if err := rows.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
-			log.Fatal(err)
 			return []ToDo{}, err
 		}
 		todos = append(todos, todo)
 	}
 
 	if err := rows.Err(); err != nil {
-		log.Fatal(err)
 		return []ToDo{}, err
 	}
 
@@ -51,14 +48,11 @@ func (b *BaseModel) GetSingleToDo(todoId string) (ToDo, error) {
 	todo := ToDo{}
 
 	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
-		log.Fatal(err)
 		return ToDo{}, err
 	}
 
 	if err := row.Err(); err != nil {
-		log.Fatal(err)
 		return ToDo{}, err
-
 	}
 
 	return todo, nil
@@ -72,7 +66,6 @@ func (b *BaseModel) UpdateSingleToDo(todoId string, text string, done bool) (ToD
 			WHERE id = $3 RETURNING *;`, text, done, todoId)
 
 	if err := row.Scan(&todo.Id, &todo.Text, &todo.Done); err != nil {
-		log.Fatal(err)
 		return ToDo{}, err
 	}
 
