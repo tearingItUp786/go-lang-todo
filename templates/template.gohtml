@@ -137,9 +137,10 @@
             csvDropzone.addEventListener("drop", function (event) {
                 event.preventDefault();
                 csvDropzone.style.border = "none";
-               const csvFile = event.dataTransfer.files[0];
+                const csvFile = event.dataTransfer.files[0];
 
                 if (csvFile.type === "text/csv" || csvFile.type === "application/vnd.ms-excel") {
+                    csvInput.files = event.dataTransfer.files;
                     csvSubmitButton.disabled = false;
                     csvDropzone.classList.add(CLASS_TO_TOGGLE); // Add a class to the form
                     csvSvg.classList.add('hidden');
@@ -147,7 +148,7 @@
                     csvTitle.innerText = csvFile.name;
 
                 } else {
-                    alert("Please drop a CSV file.");
+                    alert("Please drop a valid CSV file.");
                 }
             });
 
@@ -185,7 +186,7 @@
             }
 
           const modal = document.getElementById("bulkModal");
-          modal.onClose = onClose
+          modal.onClose = onClose;
       </script>
   </body>
 </html>
