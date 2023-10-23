@@ -214,8 +214,7 @@ func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 	}
 	// Process the CSV records
 	bulkTodos := []models.ToDo{}
-	for i := 1; i < len(records); i++ {
-		record := records[i]
+	for _, record := range records {
 		fmt.Println(record)
 		done := record[1] == "true"
 		bulkTodos = append(bulkTodos, models.ToDo{Text: record[0], Done: done})

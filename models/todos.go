@@ -148,13 +148,14 @@ func (b *BaseModel) BulkInsertToDos(bulkTodos []ToDo) ([]ToDo, error) {
 	var todos []ToDo
 	for _, bulkTodo := range bulkTodos {
 
-		_, err := stmt.Exec(bulkTodo.Text, false)
-		if err != nil {
+		if _, err := stmt.Exec(bulkTodo.Text, false); err != nil {
 			return nil, err
 		}
+
 		todo := ToDo{Text: bulkTodo.Text, Done: bulkTodo.Done}
 		todos = append(todos, todo)
 	}
+
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
