@@ -11,7 +11,7 @@
           {{ if .Done }} checked {{ end }} 
           hx-target="#todo-{{ .Id }}"
           hx-swap="outerHTML"
-          hx-patch="/{{ .Id }}/toggle" 
+          hx-patch="/todo/{{ .Id }}/toggle" 
           id="checkbox-{{ .Id }}" 
           type="checkbox" 
           class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
@@ -28,7 +28,7 @@
     <div>
       <button 
         id="edit-button-{{ .Id }}"
-        hx-get="/{{ .Id }}/edit"
+        hx-get="/todo/{{ .Id }}/edit"
         hx-swap="outerHTML"
         hx-target="#todo-{{.Id }}"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -38,7 +38,7 @@
       <button 
         hx-target="#todo-{{ .Id }}"
         hx-swap="outerHTML"
-        hx-delete="/{{ .Id }}"
+        hx-delete="/todo/{{ .Id }}"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Remove
@@ -65,7 +65,7 @@
   ">
   <form
     class="flex w-full mb-0"
-    hx-patch="/{{ .Id }}/edit"
+    hx-patch="/todo/{{ .Id }}/edit"
     hx-target="#todo-{{.Id }}"
     hx-swap="outerHTML"
   >
@@ -100,7 +100,7 @@
       <button 
         hx-target="#todo-{{ .Id }}"
         hx-swap="outerHTML"
-        hx-delete="/{{ .Id }}"
+        hx-delete="/todo/{{ .Id }}"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Remove

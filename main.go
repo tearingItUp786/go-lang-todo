@@ -63,7 +63,20 @@ func main() {
 		[]byte(csrfKey),
 		csrf.Secure(csrfSecure),
 	)
+
+	userService := models.NewUserService(db)
+	sessionService := models.NewSessionService(db)
 	todoService := models.NewBaseModel(db)
+
+	// middleware setup
+	umw := controllers.UserMiddleware{
+		SessionService: sessionService,
+	}
+
+	userController := controllers.NewUserController(
+		userService,
+		sessionService,
+	)
 
 	todoController := controllers.NewTodoController(
 		controllers.BaseHandlerInput{TodoService: todoService},
@@ -72,20 +85,39 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(csrfMw)
-	router.Get("/", todoController.GetToDos)
-	router.Delete("/", todoController.DeleteAll)
-	router.Post("/new", todoController.NewTodo)
-	router.Post("/bulk-upload", todoController.BulkUpload)
+	router.Use(umw.SetUser)
 
-	subRouter := chi.NewRouter()
-	subRouter.Route("/{id}", func(r chi.Router) {
-		r.Delete("/", todoController.DeleteTodo)
-		r.Patch("/toggle", todoController.ToggleTodo)
-		r.Get("/edit", todoController.GetEditToDo)
-		r.Patch("/edit", todoController.PatchEditToDo)
+	router.Get("/signin", userController.GetSignIn)
+	router.Post("/signin", userController.ProcessSignIn)
+	router.Post("/signout", userController.ProcessSignOut)
+	router.Get("/signup", userController.GetSignUp)
+	router.Post("/users", userController.ProcessSignUp)
+
+	router.Route("/users/me", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", userController.CurrentUser)
 	})
 
-	router.Mount("/", subRouter)
+	router.Route("/", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", todoController.GetToDos)
+	})
+
+	subRouter := chi.NewRouter()
+
+	subRouter.Route("/", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Post("/bulk-upload", todoController.BulkUpload)
+		r.Delete("/delete-all", todoController.DeleteAll)
+		r.Post("/new", todoController.NewTodo)
+
+		r.Delete("/{id}", todoController.DeleteTodo)
+		r.Patch("/{id}/toggle", todoController.ToggleTodo)
+		r.Get("/{id}/edit", todoController.GetEditToDo)
+		r.Patch("/{id}/edit", todoController.PatchEditToDo)
+	})
+
+	router.Mount("/todo", subRouter)
 	// Serve the embedded static files
 	fileServer := http.FileServer(http.FS(staticFiles))
 	router.Handle("/static/*", fileServer)

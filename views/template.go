@@ -33,6 +33,9 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 			"csrfField": func() (template.HTML, error) {
 				return "", fmt.Errorf("csrfField not implemented")
 			},
+			"csrfFieldHtml": func() (template.HTML, error) {
+				return "", fmt.Errorf("csrfFieldHtml not implemented")
+			},
 		},
 	)
 	tpl, err := tpl.ParseFS(fs, patterns...)
@@ -70,6 +73,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data any) {
 			},
 			"csrfField": func() string {
 				return token
+			},
+			"csrfFieldHtml": func() template.HTML {
+				return csrf.TemplateField(r)
 			},
 		},
 	)

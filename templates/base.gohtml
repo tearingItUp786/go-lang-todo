@@ -50,7 +50,7 @@
      </script> 
       <form 
         id="new-todo-form"
-        hx-post="/new" 
+        hx-post="/todo/new" 
         hx-on::after-request="resetForm.apply(this)"
         hx-swap="{{if gt (len .ToDos) 0}}none{{else}}outerHTML{{end}}"
         hx-on::after-request="resetForm.apply(this)"                  
@@ -82,7 +82,7 @@
      </script> 
       <form 
         id="new-todo-form"
-        hx-post="/new" 
+        hx-post="/todo/new" 
         hx-on::after-request="resetForm.apply(this)"
         hx-swap="outerHTML"
         hx-target="#all-lists"
@@ -117,7 +117,7 @@
   <div>
       <form 
         id="new-todo-form"
-        hx-post="/new" 
+        hx-post="/todo/new" 
         hx-on::after-request="resetForm.apply(this)"
         hx-swap="none"
       >
@@ -129,6 +129,7 @@
   <div
     hx-swap-oob="innerHTML:#modal-button-container"
   >
+      <my-button class="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
       <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
       <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
   </div>

@@ -1,0 +1,39 @@
+
+{{define "header"}}
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      *:not(:defined) {
+        display: none;
+      }
+    </style>
+    <link href="/dist/style.css?={{ timeNow }}" rel="stylesheet" />
+    <script type="module" src="/dist/bundle.js?={{ timeNow }}"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.6" integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni" crossorigin="anonymous"></script>
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/static/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="theme-color" content="#ffffff">
+                    
+  </head>
+  <body class="h-screen bg-gray-100">
+    <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
+      <nav class="px-8 justify-between py-6 flex items-center space-x-12">
+        <div class="text-4xl font-serif">Todo list</div>
+      </nav>
+    </header>
+{{end}}
+
+<!-- Each page's content goes here. -->
+
+{{define "footer"}}
+  </body>
+</html>
+{{end}}

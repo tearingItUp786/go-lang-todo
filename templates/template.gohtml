@@ -28,6 +28,7 @@
         <div class="text-4xl font-serif">Todo list</div>
         {{ if not .HideButtons }}
           <div id="modal-button-container">
+            <my-button class="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
             <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
             {{if gt (len .ToDos) 0}}
               <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
@@ -37,7 +38,9 @@
       </nav>
     </header>
 {{end}}
-    <!-- Each page's content goes here. -->
+
+<!-- Each page's content goes here. -->
+
 {{define "footer"}}
     <script>
         document.body.addEventListener('htmx:configRequest', (event) => {
@@ -55,7 +58,7 @@
             });
     </script>
     <form 
-      hx-post="/bulk-upload"  
+      hx-post="/todo/bulk-upload"  
       enctype="multipart/form-data"
       hx-target="#all-lists"
       hx-swap="outerHTML"                                 
@@ -109,7 +112,7 @@
       >
         <p>Do you want to delete all the todos?</p>
       </div>
-      <my-button class="mr-4" slot="action" hx-swap="none"  hx-delete="/">
+      <my-button class="mr-4" slot="action" hx-swap="none"  hx-delete="/todo/delete-all">
         Delete all
       </my-button>
     </my-modal>

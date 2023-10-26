@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/tearingItUp786/go-lang-todo/context"
 	"github.com/tearingItUp786/go-lang-todo/models"
 	"github.com/tearingItUp786/go-lang-todo/templates"
 	"github.com/tearingItUp786/go-lang-todo/views"
@@ -50,9 +51,10 @@ type EnhancedToDo struct {
 func NewEnhancedToDo(todo models.ToDo) EnhancedToDo {
 	return EnhancedToDo{
 		ToDo: models.ToDo{
-			Id:   todo.Id,
-			Text: todo.Text,
-			Done: todo.Done,
+			Id:     todo.Id,
+			Text:   todo.Text,
+			Done:   todo.Done,
+			UserId: todo.UserId,
 		},
 		Error: false,
 	}
@@ -64,7 +66,11 @@ type Data struct {
 }
 
 func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
-	todos, err := h.todoService.GetTodos()
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	todos, err := h.todoService.GetTodos(userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -86,9 +92,14 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
-	todoText := r.FormValue("todo-text")
-	row, count, err := h.todoService.InsertToDo(todoText)
+	userId, err := context.GetUserId(r.Context())
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	todoText := r.FormValue("todo-text")
+	row, count, err := h.todoService.InsertToDo(todoText, userId)
+	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -107,9 +118,14 @@ func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	row, err := h.todoService.ToggleTodo(id)
+	userId, err := context.GetUserId(r.Context())
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	id := chi.URLParam(r, "id")
+	row, err := h.todoService.ToggleTodo(id, userId)
+	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 
@@ -117,7 +133,11 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
-	err := h.todoService.DeleteAll()
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+	err = h.todoService.DeleteAll(userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -126,8 +146,12 @@ func (h *BaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	id := chi.URLParam(r, "id")
-	count, err := h.todoService.DeleteTodo(id)
+	count, err := h.todoService.DeleteTodo(id, userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -140,8 +164,12 @@ func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	id := chi.URLParam(r, "id")
-	todo, err := h.todoService.GetSingleToDo(id)
+	todo, err := h.todoService.GetSingleToDo(id, userId)
 	if err != nil {
 		fmt.Println("FUCK")
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -152,8 +180,12 @@ func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	id := chi.URLParam(r, "id")
-	oldToDo, err := h.todoService.GetSingleToDo(id)
+	oldToDo, err := h.todoService.GetSingleToDo(id, userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -176,7 +208,7 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	todo, err := h.todoService.UpdateSingleToDo(id, newToDoText, toDoDoneAsBool)
+	todo, err := h.todoService.UpdateSingleToDo(id, newToDoText, toDoDoneAsBool, userId)
 	enhancedToDo = NewEnhancedToDo(todo)
 
 	if err != nil {
@@ -192,11 +224,15 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
+	userId, err := context.GetUserId(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	err := r.ParseMultipartForm(32 << 20) // Max memory to allocate for the form data
+	err = r.ParseMultipartForm(32 << 20) // Max memory to allocate for the form data
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -215,23 +251,20 @@ func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 	// Process the CSV records
 	bulkTodos := []models.ToDo{}
 	for _, record := range records {
-		fmt.Println(record)
 		done := record[1] == "true"
 		bulkTodos = append(bulkTodos, models.ToDo{Text: record[0], Done: done})
 	}
 
 	// You can also write the CSV data to a file if needed
 	// writeFile(records)
-	_, err = h.todoService.BulkInsertToDos(bulkTodos)
+	_, err = h.todoService.BulkInsertToDos(bulkTodos, userId)
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	todos, err := h.todoService.GetTodos()
+	todos, err := h.todoService.GetTodos(userId)
 	if err != nil {
-		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
