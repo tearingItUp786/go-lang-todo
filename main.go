@@ -79,7 +79,7 @@ func main() {
 	)
 
 	todoController := controllers.NewTodoController(
-		controllers.BaseHandlerInput{TodoService: todoService},
+		controllers.ToDoBaseHandlerInput{TodoService: todoService},
 	)
 
 	router := chi.NewRouter()
@@ -122,7 +122,7 @@ func main() {
 	fileServer := http.FileServer(http.FS(staticFiles))
 	router.Handle("/static/*", fileServer)
 
-	// Serve the embedded static files
+	// Serve the embedded js files
 	distFileServer := http.FileServer(http.FS(jsComponents))
 	router.Handle("/dist/*", distFileServer)
 
