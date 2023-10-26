@@ -13,19 +13,19 @@ import (
 	"github.com/tearingItUp786/go-lang-todo/views"
 )
 
-// BaseHandler
-type BaseHandler struct {
-	todoService  *models.BaseModel
+// ToDoBaseHandler
+type ToDoBaseHandler struct {
+	todoService  *models.ToDoService
 	homeTemplate Template
 	todoTemplate Template
 }
 
-type BaseHandlerInput struct {
-	TodoService *models.BaseModel
+type ToDoBaseHandlerInput struct {
+	TodoService *models.ToDoService
 }
 
 // NewBaseHandler returns a new BaseHandler
-func NewTodoController(baseInput BaseHandlerInput) *BaseHandler {
+func NewTodoController(baseInput ToDoBaseHandlerInput) *ToDoBaseHandler {
 	homeTemplate := views.Must(views.ParseFS(
 		templates.FS,
 		"index.gohtml", "template.gohtml", "base.gohtml", "todo-templates.gohtml",
@@ -36,7 +36,7 @@ func NewTodoController(baseInput BaseHandlerInput) *BaseHandler {
 		"base.gohtml", "todo-templates.gohtml",
 	))
 
-	return &BaseHandler{
+	return &ToDoBaseHandler{
 		todoService:  baseInput.TodoService,
 		homeTemplate: homeTemplate,
 		todoTemplate: todoTemplate,
@@ -65,7 +65,7 @@ type Data struct {
 	HideButtons bool
 }
 
-func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -91,7 +91,7 @@ func (h *BaseHandler) GetToDos(w http.ResponseWriter, r *http.Request) {
 	h.homeTemplate.Execute(w, r, data)
 }
 
-func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -117,7 +117,7 @@ func (h *BaseHandler) NewTodo(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", enhancedRow)
 }
 
-func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -132,7 +132,7 @@ func (h *BaseHandler) ToggleTodo(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "swap-todo", NewEnhancedToDo(row))
 }
 
-func (h *BaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -145,7 +145,7 @@ func (h *BaseHandler) DeleteAll(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "empty-list", nil)
 }
 
-func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -163,7 +163,7 @@ func (h *BaseHandler) DeleteTodo(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "empty-list", nil)
 }
 
-func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -179,7 +179,7 @@ func (h *BaseHandler) GetEditToDo(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "edit-todo", todo)
 }
 
-func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -223,7 +223,7 @@ func (h *BaseHandler) PatchEditToDo(w http.ResponseWriter, r *http.Request) {
 	h.todoTemplate.ExecuteTemplate(w, r, "swap-single", enhancedToDo)
 }
 
-func (h *BaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
+func (h *ToDoBaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 	userId, err := context.GetUserId(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

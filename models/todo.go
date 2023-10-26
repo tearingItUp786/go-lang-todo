@@ -11,17 +11,17 @@ type ToDo struct {
 	UserId int64
 }
 
-type BaseModel struct {
+type ToDoService struct {
 	DB *sql.DB
 }
 
-func NewBaseModel(db *sql.DB) *BaseModel {
-	return &BaseModel{
+func NewBaseModel(db *sql.DB) *ToDoService {
+	return &ToDoService{
 		DB: db,
 	}
 }
 
-func (b *BaseModel) GetTodos(userId int) ([]ToDo, error) {
+func (b *ToDoService) GetTodos(userId int) ([]ToDo, error) {
 	rows, _ := b.DB.Query("SELECT * FROM todos WHERE user_id=$1 ORDER BY id DESC;", userId)
 	defer rows.Close()
 	// print rows as json
@@ -42,7 +42,7 @@ func (b *BaseModel) GetTodos(userId int) ([]ToDo, error) {
 	return todos, nil
 }
 
-func (b *BaseModel) GetSingleToDo(todoId string, userId int) (ToDo, error) {
+func (b *ToDoService) GetSingleToDo(todoId string, userId int) (ToDo, error) {
 	row := b.DB.QueryRow("SELECT * FROM todos WHERE id=$1 AND user_id=$2;", todoId, userId)
 
 	// print rows as json
@@ -59,7 +59,7 @@ func (b *BaseModel) GetSingleToDo(todoId string, userId int) (ToDo, error) {
 	return todo, nil
 }
 
-func (b *BaseModel) UpdateSingleToDo(
+func (b *ToDoService) UpdateSingleToDo(
 	todoId string,
 	text string,
 	done bool,
@@ -78,7 +78,7 @@ func (b *BaseModel) UpdateSingleToDo(
 	return todo, nil
 }
 
-func (b *BaseModel) InsertToDo(todoText string, userId int) (ToDo, int, error) {
+func (b *ToDoService) InsertToDo(todoText string, userId int) (ToDo, int, error) {
 	todo := ToDo{}
 	row := b.DB.QueryRow(
 		"INSERT INTO todos (text, done, user_id) VALUES ($1, $2, $3) RETURNING *;",
@@ -101,7 +101,7 @@ func (b *BaseModel) InsertToDo(todoText string, userId int) (ToDo, int, error) {
 	return todo, count, nil
 }
 
-func (b *BaseModel) ToggleTodo(todoId string, userId int) (ToDo, error) {
+func (b *ToDoService) ToggleTodo(todoId string, userId int) (ToDo, error) {
 	todo := ToDo{}
 	row := b.DB.QueryRow(`UPDATE todos
 			SET done = NOT done
@@ -113,7 +113,7 @@ func (b *BaseModel) ToggleTodo(todoId string, userId int) (ToDo, error) {
 	return todo, nil
 }
 
-func (b *BaseModel) DeleteTodo(todoId string, userId int) (int, error) {
+func (b *ToDoService) DeleteTodo(todoId string, userId int) (int, error) {
 	// Deleting the specified todo
 	_, err := b.DB.Exec("DELETE FROM todos WHERE id = $1 AND user_id = $2", todoId, userId)
 	if err != nil {
@@ -131,7 +131,7 @@ func (b *BaseModel) DeleteTodo(todoId string, userId int) (int, error) {
 	return remainingCount, nil
 }
 
-func (b *BaseModel) DeleteAll(userId int) error {
+func (b *ToDoService) DeleteAll(userId int) error {
 	// Deleting the specified todo
 	_, err := b.DB.Exec("DELETE FROM todos where user_id=$1;", userId)
 	if err != nil {
@@ -141,7 +141,7 @@ func (b *BaseModel) DeleteAll(userId int) error {
 	return nil
 }
 
-func (b *BaseModel) BulkInsertToDos(bulkTodos []ToDo, userId int) ([]ToDo, error) {
+func (b *ToDoService) BulkInsertToDos(bulkTodos []ToDo, userId int) ([]ToDo, error) {
 	tx, err := b.DB.Begin()
 	if err != nil {
 		return nil, err
