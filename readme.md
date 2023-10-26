@@ -32,7 +32,7 @@ To run the development environment, execute the following commands in order:
    ```
 2. start the server using air:
    ```shell
-   air
+   air kill
    ```
 3. build and watch for changes:
    ```shell
