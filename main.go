@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 	"github.com/tearingItUp786/go-lang-todo/controllers"
@@ -85,6 +86,7 @@ func main() {
 	router := chi.NewRouter()
 
 	router.Use(csrfMw)
+	router.Use(middleware.Logger)
 	router.Use(umw.SetUser)
 
 	router.Route("/signin", func(r chi.Router) {
