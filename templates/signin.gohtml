@@ -1,4 +1,4 @@
-{{template "header" . }}
+{{ template "header" . }}
 <div class="py-12 flex justify-center">
   <div class="px-8 py-8 bg-white rounded shadow">
     <h1 class="pt-4 pb-8 text-center text-3xl font-bold text-gray-900">
@@ -6,7 +6,7 @@
     </h1>
     <form action="/signin" method="post">
       <div class="hidden">
-        {{csrfFieldHtml}}
+        {{ csrfFieldHtml }}
       </div>
       <div class="py-2">
         <label for="email" class="text-sm font-semibold text-gray-800"
@@ -28,8 +28,8 @@
             text-gray-800
             rounded
           "
-          value="{{.Email}}"
-          {{if not .Email}}autofocus{{end}}
+          value="{{ .Email }}"
+          {{ if not .Email }}autofocus{{ end }}
         />
       </div>
       <div class="py-2">
@@ -51,7 +51,7 @@
             text-gray-800
             rounded
           "
-          {{if .Email}}autofocus{{end}}
+          {{ if .Email }}autofocus{{ end }}
         />
       </div>
       <div class="py-4">
@@ -84,4 +84,4 @@
     </form>
   </div>
 </div>
-{{template "footer" . }}
+{{ template "footer" . }}

@@ -104,7 +104,6 @@ func main() {
 	})
 
 	subRouter := chi.NewRouter()
-
 	subRouter.Route("/", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Post("/bulk-upload", todoController.BulkUpload)

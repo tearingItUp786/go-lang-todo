@@ -1,171 +1,175 @@
 {{ define "form-content" }}
   <div class="mt-4 mb-6">
     <div class="">
-        <label 
-            id="todo-label"
-            for="todo-text"
-            class="w-full text-3xl mb-4 block">
+      <label id="todo-label" for="todo-text" class="w-full text-3xl mb-4 block">
         Add a new task
-        </label>
-          <input 
-            id="todo-text"
-            name="todo-text"
-            onkeyup="change:stoppedTyping.call(this)"
-            type="text" 
-            class="mb-4 max-w-[300px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 " 
-            required
-            placeholder="Add a new task"
-          >
-
+      </label>
+      <input
+        id="todo-text"
+        name="todo-text"
+        onkeyup="change:stoppedTyping.call(this)"
+        type="text"
+        class="mb-4 max-w-[300px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2"
+        required
+        placeholder="Add a new task"
+      />
     </div>
 
     <div>
-      <button 
+      <button
         disabled
         id="submit-new"
         type="submit"
-        class="
-        disabled:pointer-events-none disabled:opacity-50
-        bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        class="disabled:pointer-events-none disabled:opacity-50 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
         Submit
       </button>
     </div>
   </div>
-{{ end }} 
-
+{{ end }}
 
 {{ define "server-load-form" }}
   <div id="todo-form-container">
-      <script>
-        function stoppedTyping(){
-            let submitButton =  document.getElementById('submit-new')
-            this.value.length > 0 ? submitButton.disabled = false : submitButton.disabled = true;
-        }
-
-        function resetForm() {
-          this.reset();
-          document.getElementById('submit-new').disabled = true;
-        }
-     </script> 
-      <form 
-        id="new-todo-form"
-        hx-post="/todo/new" 
-        hx-on::after-request="resetForm.apply(this)"
-        hx-swap="{{if gt (len .ToDos) 0}}none{{else}}outerHTML{{end}}"
-        hx-on::after-request="resetForm.apply(this)"                  
-        {{if lt (len .ToDos) 1}}                                      
-          hx-target="#all-lists"                                 
-        {{end}}
-      >
-        {{ template "form-content" .  }}
-      </form>
-  </div>
-{{ end }}
-
-
-{{ define "add-todo-form" }}
-  <div id="todo-form-container">
-      <script>
-        function stoppedTyping(){
-            let submitButton =  document.getElementById('submit-new')
-            this.value.length > 0 ? submitButton.disabled = false : submitButton.disabled = true;
-        }
-
-        function resetForm() {
-          this.reset();
-          document.getElementById('submit-new').disabled = true;
-        }
-        function focusInput(){
-          document.getElementById("todo-text").focus()
-        }
-     </script> 
-      <form 
-        id="new-todo-form"
-        hx-post="/todo/new" 
-        hx-on::after-request="resetForm.apply(this)"
-        hx-swap="outerHTML"
-        hx-target="#all-lists"
-      >
-      {{ template "form-content" . }}
-      </form>
-  </div>
-{{end}}
-
-
-{{ define "add-new-todo-swap" }}
-  {{ template "todo-lists" . }}
-  <div 
-    hx-on::after-settle="focusInput.apply(this)"
-    hx-swap-oob="outerHTML:#new-todo-form"
-  >
-  <script>
-      function stoppedTyping(){
-          let submitButton =  document.getElementById('submit-new')
-          this.value.length > 0 ? submitButton.disabled = false : submitButton.disabled = true;
+    <script>
+      function stoppedTyping() {
+        let submitButton = document.getElementById("submit-new");
+        this.value.length > 0
+          ? (submitButton.disabled = false)
+          : (submitButton.disabled = true);
       }
 
       function resetForm() {
         this.reset();
-        document.getElementById('submit-new').disabled = true;
+        document.getElementById("submit-new").disabled = true;
+      }
+    </script>
+    <form
+      id="new-todo-form"
+      hx-post="/todo/new"
+      hx-on::after-request="resetForm.apply(this)"
+      hx-swap="{{ if gt (len .ToDos) 0 }}
+        none
+      {{ else }}
+        outerHTML
+      {{ end }}"
+      hx-on::after-request="resetForm.apply(this)"
+      {{ if
+        lt
+        (len
+        .ToDos)
+        1
+      }}
+        hx-target="#all-lists"
+      {{ end }}
+    >
+      {{ template "form-content" . }}
+    </form>
+  </div>
+{{ end }}
+{{ define "add-todo-form" }}
+  <div id="todo-form-container">
+    <script>
+      function stoppedTyping() {
+        let submitButton = document.getElementById("submit-new");
+        this.value.length > 0
+          ? (submitButton.disabled = false)
+          : (submitButton.disabled = true);
       }
 
-      function focusInput(){
-        document.getElementById("todo-text").focus()
+      function resetForm() {
+        this.reset();
+        document.getElementById("submit-new").disabled = true;
       }
- </script> 
-  <div>
-      <form 
+      function focusInput() {
+        document.getElementById("todo-text").focus();
+      }
+    </script>
+    <form
+      id="new-todo-form"
+      hx-post="/todo/new"
+      hx-on::after-request="resetForm.apply(this)"
+      hx-swap="outerHTML"
+      hx-target="#all-lists"
+    >
+      {{ template "form-content" . }}
+    </form>
+  </div>
+{{ end }}
+{{ define "add-new-todo-swap" }}
+  {{ template "todo-lists" . }}
+  <div
+    hx-on::after-settle="focusInput.apply(this)"
+    hx-swap-oob="outerHTML:#new-todo-form"
+  >
+    <script>
+      function stoppedTyping() {
+        let submitButton = document.getElementById("submit-new");
+        this.value.length > 0
+          ? (submitButton.disabled = false)
+          : (submitButton.disabled = true);
+      }
+
+      function resetForm() {
+        this.reset();
+        document.getElementById("submit-new").disabled = true;
+      }
+
+      function focusInput() {
+        document.getElementById("todo-text").focus();
+      }
+    </script>
+    <div>
+      <form
         id="new-todo-form"
-        hx-post="/todo/new" 
+        hx-post="/todo/new"
         hx-on::after-request="resetForm.apply(this)"
         hx-swap="none"
       >
         {{ template "form-content" }}
       </form>
+    </div>
   </div>
-  </div>
-  
-  <div
-    hx-swap-oob="innerHTML:#modal-button-container"
-  >
-      <my-button class="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
-      <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
-      <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
+
+  <div hx-swap-oob="innerHTML:#modal-button-container">
+    <my-button class="mr-4" hx-target="body" hx-post="/signout"
+      >Sign Out</my-button
+    >
+    <my-open-modal-button class="mr-4" modalId="bulkModal"
+      >Bulk Upload</my-open-modal-button
+    >
+    <my-open-modal-button id="delete-all-button" modalid="deleteModal"
+      >Delete All</my-open-modal-button
+    >
   </div>
 {{ end }}
 
 {{ define "todo-lists" }}
   <div id="all-lists" class="lg:flex lg:flex-column">
-  {{ if eq (len .ToDos) 0 }}
+    {{ if eq (len .ToDos) 0 }}
       <div class="w-full">
-        <h1>Why not add a todo? 😊</h1>  
+        <h1>Why not add a todo? 😊</h1>
       </div>
-  {{ end }}
-    <div class="w-full  pr-3">
-      {{if gt (len .ToDos) 0}}
+    {{ end }}
+    <div class="w-full pr-3">
+      {{ if gt (len .ToDos) 0 }}
         <h2 class="text-3xl mb-4">Remaining tasks</h2>
         <ul id="incomplete-list">
-          {{range .ToDos}}
-              {{ if not  .Done }}
-                  {{ template "todo-item" . }}
-              {{ end }}
-          {{end}}
+          {{ range .ToDos }}
+            {{ if not .Done }}{{ template "todo-item" . }}{{ end }}
+          {{ end }}
         </ul>
-      {{end}}
+      {{ end }}
     </div>
 
     <div class="w-full lg:pl-3">
-      {{if gt (len .ToDos) 0}}
+      {{ if gt (len .ToDos) 0 }}
         <h2 class="text-3xl mb-4">Completed tasks</h2>
         <ul id="complete-list">
-          {{range .ToDos}}
-              {{ if .Done }}
-                {{ template "todo-item" . }}
-              {{ end }}
-          {{end}}
+          {{ range .ToDos }}
+            {{ if .Done }}{{ template "todo-item" . }}{{ end }}
+          {{ end }}
         </ul>
-      {{end}}
+      {{ end }}
     </div>
   </div>
 {{ end }}
@@ -182,10 +186,7 @@
     hx-on::after-settle="focusInput.apply(this)"
     hx-swap-oob="innerHTML:#all-lists"
   >
-      <h1>Looks like you got nothing</h1>  
+    <h1>Looks like you got nothing</h1>
   </div>
-  <div
-    hx-swap-oob="delete:#delete-all-button"
-  >
-  </div>
-{{ end }} 
+  <div hx-swap-oob="delete:#delete-all-button"></div>
+{{ end }}
