@@ -43,6 +43,12 @@ func NewUserController(
 }
 
 func (ubh UserBaseHandler) GetSignIn(w http.ResponseWriter, r *http.Request) {
+	user := context.User(r.Context())
+	if user != nil {
+		http.Redirect(w, r, "/", http.StatusFound)
+		return
+	}
+
 	ubh.signInTemplate.Execute(w, r, nil)
 }
 
@@ -136,6 +142,17 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithUser(ctx, user)
 		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (umw UserMiddleware) RedirectToRootIfHasUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user != nil {
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }

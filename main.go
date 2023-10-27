@@ -87,7 +87,11 @@ func main() {
 	router.Use(csrfMw)
 	router.Use(umw.SetUser)
 
-	router.Get("/signin", userController.GetSignIn)
+	router.Route("/signin", func(r chi.Router) {
+		r.Use(umw.RedirectToRootIfHasUser)
+		r.Get("/", userController.GetSignIn)
+	})
+
 	router.Post("/signin", userController.ProcessSignIn)
 	router.Post("/signout", userController.ProcessSignOut)
 	router.Get("/signup", userController.GetSignUp)
