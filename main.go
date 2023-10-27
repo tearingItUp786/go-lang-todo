@@ -126,14 +126,12 @@ func baseRouter(
 ) http.Handler {
 	router := chi.NewRouter()
 
+	router.Get("/signin", userController.GetSignIn)
 	router.Post("/signin", userController.ProcessSignIn)
 	router.Post("/signout", userController.ProcessSignOut)
 	router.Get("/signup", userController.GetSignUp)
-
-	router.Route("/", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Get("/", todoController.GetToDos)
-		r.Get("/signin", userController.GetSignIn)
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/todo", http.StatusFound)
 	})
 
 	return router
@@ -146,6 +144,7 @@ func todoRouter(
 	router := chi.NewRouter()
 	router.Route("/", func(r chi.Router) {
 		r.Use(umw.RequireUser)
+		r.Get("/", todoController.GetToDos)
 		r.Post("/bulk-upload", todoController.BulkUpload)
 		r.Delete("/delete-all", todoController.DeleteAll)
 		r.Post("/new", todoController.NewTodo)
