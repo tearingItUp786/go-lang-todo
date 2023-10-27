@@ -85,8 +85,12 @@ func main() {
 
 	router := chi.NewRouter()
 
-	router.Use(csrfMw)
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
 	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+
+	router.Use(csrfMw)
 	router.Use(umw.SetUser)
 
 	router.Route("/signin", func(r chi.Router) {
