@@ -11,12 +11,18 @@ const (
 )
 
 func newCookie(name, value string) *http.Cookie {
+	httpOnly := os.Getenv("COOKIE_SECURE") != "true"
+	secure := os.Getenv("COOKIE_SECURE") == "true"
+
+	fmt.Println("cookie secure", secure)
+	fmt.Println("http only", httpOnly)
+
 	cookie := http.Cookie{
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		HttpOnly: true,
-		Secure:   os.Getenv("COOKIE_SECURE") == "true",
+		HttpOnly: httpOnly,
+		Secure:   secure,
 	}
 	return &cookie
 }
