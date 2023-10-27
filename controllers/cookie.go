@@ -3,7 +3,6 @@ package controllers
 import (
 	"fmt"
 	"net/http"
-	"os"
 )
 
 const (
@@ -11,18 +10,11 @@ const (
 )
 
 func newCookie(name, value string) *http.Cookie {
-	httpOnly := os.Getenv("COOKIE_SECURE") != "true"
-	secure := os.Getenv("COOKIE_SECURE") == "true"
-
-	fmt.Println("cookie secure", secure)
-	fmt.Println("http only", httpOnly)
-
 	cookie := http.Cookie{
 		Name:     name,
 		Value:    value,
 		Path:     "/",
-		HttpOnly: httpOnly,
-		Secure:   secure,
+		HttpOnly: true,
 	}
 	return &cookie
 }
