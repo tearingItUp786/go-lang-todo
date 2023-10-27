@@ -15,7 +15,7 @@ type ToDoService struct {
 	DB *sql.DB
 }
 
-func NewBaseModel(db *sql.DB) *ToDoService {
+func NewTodoService(db *sql.DB) *ToDoService {
 	return &ToDoService{
 		DB: db,
 	}
