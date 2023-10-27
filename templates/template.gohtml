@@ -24,10 +24,10 @@
   </head>
   <body class="h-screen bg-gray-100">
     <header class="bg-gradient-to-r from-blue-800 to-indigo-800 text-white">
-      <nav class="px-8 justify-between py-6 flex items-center space-x-12">
+      <nav class="px-8 justify-between py-6 block lg:flex items-center lg:space-x-12">
         <div class="text-4xl font-serif">Todo list</div>
         {{ if not .HideButtons }}
-          <div id="modal-button-container">
+          <div class="mt-4 lg:mt-0" id="modal-button-container">
             <my-button class="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
             <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
             {{if gt (len .ToDos) 0}}
