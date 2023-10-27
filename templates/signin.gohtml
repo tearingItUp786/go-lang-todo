@@ -4,6 +4,9 @@
     <h1 class="pt-4 pb-8 text-center text-3xl font-bold text-gray-900">
       Welcome back
     </h1>
+    {{ if .Error }}
+    <h2 class="text-red-500  font-bold">{{ .Error }}</h2>
+    {{ end }}
     <form action="/signin" method="post">
       <div class="hidden">
         {{ csrfFieldHtml }}

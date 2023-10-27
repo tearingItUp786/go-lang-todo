@@ -163,10 +163,10 @@ func userRouter(
 	userController controllers.UserBaseHandler,
 ) http.Handler {
 	router := chi.NewRouter()
-	router.Route("/users", func(r chi.Router) {
+	router.Post("/", userController.ProcessSignUp)
+	router.Route("/", func(r chi.Router) {
 		r.Use(umw.RequireUser)
-		r.Get("/", userController.CurrentUser)
-		r.Post("/", userController.ProcessSignUp)
+		r.Get("/me", userController.CurrentUser)
 	})
 
 	return router

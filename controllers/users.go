@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -42,6 +43,11 @@ func NewUserController(
 	}
 }
 
+type SignInData struct {
+	Error error
+	Email string
+}
+
 func (ubh UserBaseHandler) GetSignIn(w http.ResponseWriter, r *http.Request) {
 	user := context.User(r.Context())
 	if user != nil {
@@ -49,7 +55,8 @@ func (ubh UserBaseHandler) GetSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ubh.signInTemplate.Execute(w, r, nil)
+	data := SignInData{}
+	ubh.signInTemplate.Execute(w, r, data)
 }
 
 func (ubh UserBaseHandler) GetSignUp(w http.ResponseWriter, r *http.Request) {
@@ -73,7 +80,7 @@ func (ubh UserBaseHandler) ProcessSignUp(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
-	http.Redirect(w, r, "/", http.StatusFound)
+	http.Redirect(w, r, "/signin", http.StatusFound)
 }
 
 func (ubh UserBaseHandler) CurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -91,14 +98,22 @@ func (ubh UserBaseHandler) ProcessSignIn(w http.ResponseWriter, r *http.Request)
 	user, err := ubh.userService.Authenticate(data.Email, data.Password)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong.", http.StatusInternalServerError)
+		data := SignInData{
+			Error: errors.New("Invalid email or password"),
+			Email: data.Email,
+		}
+		ubh.signInTemplate.Execute(w, r, data)
 		return
 	}
 	session, err := ubh.sessionService.Create(user.ID)
 	fmt.Println(session, err)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong.", http.StatusInternalServerError)
+		data := SignInData{
+			Error: errors.New("Invalid email or password"),
+			Email: data.Email,
+		}
+		ubh.signInTemplate.Execute(w, r, data)
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
