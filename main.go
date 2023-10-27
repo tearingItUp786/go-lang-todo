@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -67,13 +68,14 @@ func main() {
 
 	userService := models.NewUserService(db)
 	sessionService := models.NewSessionService(db)
-	todoService := models.NewBaseModel(db)
+	todoService := models.NewTodoService(db)
 
 	// middleware setup
 	umw := controllers.UserMiddleware{
 		SessionService: sessionService,
 	}
 
+	// controller setup
 	userController := controllers.NewUserController(
 		userService,
 		sessionService,
@@ -83,6 +85,7 @@ func main() {
 		controllers.ToDoBaseHandlerInput{TodoService: todoService},
 	)
 
+	// routing setup starts
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -90,43 +93,18 @@ func main() {
 	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 
+	// Set a timeout value on the request context (ctx), that will signal
+	// through ctx.Done() that the request has timed out and further
+	// processing should be stopped.
+	router.Use(middleware.Timeout(60 * time.Second))
+
 	router.Use(csrfMw)
 	router.Use(umw.SetUser)
 
-	router.Route("/signin", func(r chi.Router) {
-		r.Use(umw.RedirectToRootIfHasUser)
-		r.Get("/", userController.GetSignIn)
-	})
+	router.Mount("/", baseRouter(umw, userController, todoController))
+	router.Mount("/todo", todoRouter(umw, todoController))
+	router.Mount("/users", userRouter(umw, userController))
 
-	router.Post("/signin", userController.ProcessSignIn)
-	router.Post("/signout", userController.ProcessSignOut)
-	router.Get("/signup", userController.GetSignUp)
-	router.Post("/users", userController.ProcessSignUp)
-
-	router.Route("/users/me", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Get("/", userController.CurrentUser)
-	})
-
-	router.Route("/", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Get("/", todoController.GetToDos)
-	})
-
-	subRouter := chi.NewRouter()
-	subRouter.Route("/", func(r chi.Router) {
-		r.Use(umw.RequireUser)
-		r.Post("/bulk-upload", todoController.BulkUpload)
-		r.Delete("/delete-all", todoController.DeleteAll)
-		r.Post("/new", todoController.NewTodo)
-
-		r.Delete("/{id}", todoController.DeleteTodo)
-		r.Patch("/{id}/toggle", todoController.ToggleTodo)
-		r.Get("/{id}/edit", todoController.GetEditToDo)
-		r.Patch("/{id}/edit", todoController.PatchEditToDo)
-	})
-
-	router.Mount("/todo", subRouter)
 	// Serve the embedded static files
 	fileServer := http.FileServer(http.FS(staticFiles))
 	router.Handle("/static/*", fileServer)
@@ -139,4 +117,58 @@ func main() {
 
 	fmt.Println("Server running on port", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
+}
+
+func baseRouter(
+	umw controllers.UserMiddleware,
+	userController controllers.UserBaseHandler,
+	todoController controllers.ToDoBaseHandler,
+) http.Handler {
+	router := chi.NewRouter()
+
+	router.Post("/signin", userController.ProcessSignIn)
+	router.Post("/signout", userController.ProcessSignOut)
+	router.Get("/signup", userController.GetSignUp)
+
+	router.Route("/", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", todoController.GetToDos)
+		r.Get("/signin", userController.GetSignIn)
+	})
+
+	return router
+}
+
+func todoRouter(
+	umw controllers.UserMiddleware,
+	todoController controllers.ToDoBaseHandler,
+) http.Handler {
+	router := chi.NewRouter()
+	router.Route("/", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Post("/bulk-upload", todoController.BulkUpload)
+		r.Delete("/delete-all", todoController.DeleteAll)
+		r.Post("/new", todoController.NewTodo)
+
+		r.Delete("/{id}", todoController.DeleteTodo)
+		r.Patch("/{id}/toggle", todoController.ToggleTodo)
+		r.Get("/{id}/edit", todoController.GetEditToDo)
+		r.Patch("/{id}/edit", todoController.PatchEditToDo)
+	})
+
+	return router
+}
+
+func userRouter(
+	umw controllers.UserMiddleware,
+	userController controllers.UserBaseHandler,
+) http.Handler {
+	router := chi.NewRouter()
+	router.Route("/users", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", userController.CurrentUser)
+		r.Post("/", userController.ProcessSignUp)
+	})
+
+	return router
 }

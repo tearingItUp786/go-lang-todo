@@ -25,7 +25,7 @@ type ToDoBaseHandlerInput struct {
 }
 
 // NewBaseHandler returns a new BaseHandler
-func NewTodoController(baseInput ToDoBaseHandlerInput) *ToDoBaseHandler {
+func NewTodoController(baseInput ToDoBaseHandlerInput) ToDoBaseHandler {
 	homeTemplate := views.Must(views.ParseFS(
 		templates.FS,
 		"index.gohtml", "template.gohtml", "base.gohtml", "todo-templates.gohtml",
@@ -36,7 +36,7 @@ func NewTodoController(baseInput ToDoBaseHandlerInput) *ToDoBaseHandler {
 		"base.gohtml", "todo-templates.gohtml",
 	))
 
-	return &ToDoBaseHandler{
+	return ToDoBaseHandler{
 		todoService:  baseInput.TodoService,
 		homeTemplate: homeTemplate,
 		todoTemplate: todoTemplate,

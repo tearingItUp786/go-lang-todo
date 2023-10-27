@@ -25,7 +25,7 @@ type UserBaseHandlerInput struct {
 func NewUserController(
 	userService *models.UserService,
 	sessionService *models.SessionService,
-) *UserBaseHandler {
+) UserBaseHandler {
 	signInTemplate := views.Must(views.ParseFS(
 		templates.FS,
 		"signin.gohtml", "unauth-template.gohtml",
@@ -34,7 +34,7 @@ func NewUserController(
 		templates.FS,
 		"signup.gohtml", "unauth-template.gohtml",
 	))
-	return &UserBaseHandler{
+	return UserBaseHandler{
 		userService:    userService,
 		sessionService: sessionService,
 		signInTemplate: signInTemplate,
