@@ -88,6 +88,7 @@ func main() {
 	googleAuthController := controllers.NewGoogleAuthController(
 		os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
 		os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		os.Getenv("GOOGLE_OAUTH_REDIRECT_URL"),
 		userService,
 		sessionService,
 	)

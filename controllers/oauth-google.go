@@ -30,12 +30,13 @@ type MyGoogleOAuth struct {
 }
 
 func NewGoogleAuthController(
-	clientId, clientSecret string,
+	clientId, clientSecret, redirectUrl string,
 	userService *models.UserService,
 	sessionService *models.SessionService,
 ) *MyGoogleOAuth {
 	oauthConfig := oauth2.Config{
-		RedirectURL:  "http://localhost:8080/auth/google/callback",
+		RedirectURL: redirectUrl,
+		// RedirectURL:  "http://localhost:8080/auth/google/callback",
 		ClientID:     clientId,
 		ClientSecret: clientSecret,
 		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email"},
