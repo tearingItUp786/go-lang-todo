@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -17,6 +18,7 @@ func newCookie(name, value string) *http.Cookie {
 		Path:     "/",
 		HttpOnly: true,
 		Secure:   os.Getenv("CSRF_SECURE") == "true",
+		Expires:  time.Now().Add(1 * time.Hour),
 	}
 	return &cookie
 }

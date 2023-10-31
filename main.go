@@ -85,6 +85,13 @@ func main() {
 		controllers.ToDoBaseHandlerInput{TodoService: todoService},
 	)
 
+	googleAuthController := controllers.NewGoogleAuthController(
+		os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
+		os.Getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
+		userService,
+		sessionService,
+	)
+
 	// routing setup starts
 	router := chi.NewRouter()
 
@@ -100,8 +107,9 @@ func main() {
 
 	router.Use(csrfMw)
 	router.Use(umw.SetUser)
-
+	fmt.Println(os.Getenv("GOOGLE_OAUTH_CLIENT_ID"))
 	router.Mount("/", baseRouter(umw, userController, todoController))
+	router.Mount("/auth/google", oauthRouter(*googleAuthController))
 	router.Mount("/todo", todoRouter(umw, todoController))
 	router.Mount("/users", userRouter(umw, userController))
 
@@ -117,6 +125,13 @@ func main() {
 
 	fmt.Println("Server running on port", port)
 	http.ListenAndServe(fmt.Sprintf(":%s", port), router)
+}
+
+func oauthRouter(googleAuthController controllers.MyGoogleOAuth) http.Handler {
+	router := chi.NewRouter()
+	router.Get("/login", googleAuthController.OauthGoogleLogin)
+	router.Get("/callback", googleAuthController.OauthGoogleCallback)
+	return router
 }
 
 func baseRouter(
