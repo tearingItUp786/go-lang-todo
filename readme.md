@@ -1,6 +1,7 @@
 # Go todo + htmx + tailwind + lit
 
-This project is a simple todo app using go, htmx, and lit web components.
+This project is a simple todo app using go, htmx, and lit web components. It's the first time I've ever used any of these technologies
+but I gotta say, it was a blast 🚀!
 
 ## getting started
 
@@ -11,49 +12,34 @@ To run the development environment, follow the steps below:
 Make sure you have the following software installed on your machine:
 
 - docker
-- node.js
+- node.js (I recommend volta.sh to use as your node version manager)
 - go
 - air (go live-reload tool)
 
 ### installation
 
-1. install the dependencies:
+1. install the node dependencies:
    ```shell
    npm install
    ```
 
 ### running the development environment
 
+If you want to use google OAuth, please set it up on your end; I have not included
+my credientals in my repo 😊
+
 To run the development environment, execute the following commands in order:
 
 1. start the docker containers:
    ```shell
-   docker-compose up
+   make docker:start
    ```
-2. start the server using air:
+2. start the server using `Makefile`:
    ```shell
-   air kill
+   make dev
    ```
-3. build and watch for changes:
-   ```shell
-   npm run build:watch
-   ```
-4. view the app at `localhost:8080`
-
-## to do
-
-- [ ] write the dev script
-- [ ] add a screenshot
-- [ ] create a presentation
+3. view the app at `localhost:8080`
 
 ## explanation
 
 This project is a simple todo app built using go, htmx, and lit web components. it allows users to create, update, and delete tasks in a user-friendly interface. the backend is written in go, providing restful apis for managing the tasks. the frontend utilizes htmx and lit web components to provide a dynamic and responsive user experience.
-
-## screenshot
-
-[insert a screenshot of the project here.]
-
-## presentation
-
-[create a presentation to showcase the project's features, functionality, and any other relevant information.]
