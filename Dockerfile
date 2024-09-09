@@ -26,6 +26,6 @@ COPY --from=build-stage /app/dist /app/dist
 # Build the Go app
 RUN go build -o main .
 # Expose the port the Go app runs on
-EXPOSE 8080
+EXPOSE 13255 
 # Command to run the executable
 CMD ["./main"]
