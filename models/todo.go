@@ -155,7 +155,7 @@ func (b *ToDoService) BulkInsertToDos(bulkTodos []ToDo, userId int) ([]ToDo, err
 	var todos []ToDo
 	for _, bulkTodo := range bulkTodos {
 
-		if _, err := stmt.Exec(bulkTodo.Text, false, userId); err != nil {
+		if _, err := stmt.Exec(bulkTodo.Text, bulkTodo.Done, userId); err != nil {
 			return nil, err
 		}
 
