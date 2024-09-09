@@ -245,7 +245,7 @@ func (h *ToDoBaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 	records, err := readCSV(file)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	// Process the CSV records
@@ -283,9 +283,41 @@ func (h *ToDoBaseHandler) BulkUpload(w http.ResponseWriter, r *http.Request) {
 
 func readCSV(file multipart.File) ([][]string, error) {
 	reader := csv.NewReader(file)
+	reader.TrimLeadingSpace = true
+	headers, err := reader.Read()
+	expectedHeaders := []string{"text", "done"}
+	if err != nil {
+		return nil, err
+	}
+
+	if len(expectedHeaders) != len(headers) {
+		return nil, fmt.Errorf("Expected %d headers, got %d", len(expectedHeaders), len(headers))
+	}
+
+	for i, header := range headers {
+		if i > len(headers) {
+			break
+		}
+
+		if header != expectedHeaders[i] {
+			return nil, fmt.Errorf("Expected header %s, got %s", expectedHeaders[i], header)
+		}
+	}
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, err
 	}
-	return records, nil
+	nonEmptyRecords := [][]string{}
+	fmt.Println(records)
+	for _, record := range records {
+		if len(record) > 0 {
+			fmt.Println(record)
+			if record[0] == "" {
+				continue
+			}
+			nonEmptyRecords = append(nonEmptyRecords, record)
+		}
+	}
+	return nonEmptyRecords, nil
 }

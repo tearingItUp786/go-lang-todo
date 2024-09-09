@@ -28,10 +28,17 @@
         <div class="text-4xl font-serif">Todo list</div>
         {{ if not .HideButtons }}
           <div class="mt-4 lg:mt-0" id="modal-button-container">
-            <my-button class="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
-            <my-open-modal-button class="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
+            <my-button buttonClass="mr-4" hx-target="body" hx-post="/signout">Sign Out</my-button>
+            <my-open-modal-button buttonClass="mr-4" modalId="bulkModal">Bulk Upload</my-open-modal-button>
+
             {{if gt (len .ToDos) 0}}
-              <my-open-modal-button id="delete-all-button" modalid="deleteModal">Delete All</my-open-modal-button>
+              <my-open-modal-button 
+                buttonClass="!mb-0"
+                id="delete-all-button" 
+                modalid="deleteModal"
+              >
+                Delete All
+              </my-open-modal-button>
             {{end}}
           </div>
       {{ end }}
@@ -51,9 +58,13 @@
         document.body.addEventListener('htmx:responseError', (event) => {
                 clearTimeout(timeout);
                 const errorAlert = document.getElementById('errorAlert');
+                const errorMessage = document.getElementById('error-message');
                 errorAlert.classList.remove('hidden');
+                errorMessage.innerText = event.detail.xhr.responseText;
+
                 timeout = setTimeout(() => {
                     errorAlert.classList.add('hidden');
+                    errorMessage.innerText = "Some unknown error" 
                 }, 3000); // Hide the alert after 3 seconds
             });
     </script>
@@ -118,6 +129,7 @@
     </my-modal>
        <div id="errorAlert" class="hidden fixed top-0 left-0 w-full bg-red-500 text-white text-center py-2">
             Network request failed! Please try again later.
+            <span class="block" id="error-message">Some unknown error</span>
         </div>
        <script> 
             const CLASS_TO_TOGGLE = "bg-gray-300";

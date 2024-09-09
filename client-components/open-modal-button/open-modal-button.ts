@@ -8,6 +8,9 @@ export class MyOpenModalButton extends TailwindElement("") {
   @property({ type: String, reflect: true })
   modalId = "";
 
+  @property({ type: String, reflect: false })
+  buttonClass = "";
+
   ownOnClick() {
     // Get the current query parameters
     var queryParams = new URLSearchParams(window.location.search);
@@ -22,7 +25,11 @@ export class MyOpenModalButton extends TailwindElement("") {
 
   render() {
     return html`
-      <my-button id="${this.modalId}--button" @click=${this.ownOnClick}>
+      <my-button
+        buttonClass="${this.buttonClass}"
+        id="${this.modalId}--button"
+        @click=${this.ownOnClick}
+      >
         <slot></slot>
       </my-button>
     `;

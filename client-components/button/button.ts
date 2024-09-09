@@ -7,6 +7,9 @@ export class MyButton extends TailwindElement("") {
   @property({ type: String, reflect: true })
   type = "";
 
+  @property({ type: String, reflect: true })
+  buttonClass = "";
+
   @property({ type: Boolean, reflect: true })
   disabled = false;
 
@@ -35,7 +38,9 @@ export class MyButton extends TailwindElement("") {
       @click=${this.disabled ? null : this.handleClick}
       ?disabled=${this.disabled}
       class="
+      ${this.buttonClass}
       disabled:text-white
+      w-full md:w-auto mb-4 md:mb-0
       disabled:cursor-not-allowed	disabled:bg-slate-200 bg-white text-gray-700 hover:bg-gray-700 hover:text-white font-bold py-2 px-4 rounded"
     >
       <slot></slot>
